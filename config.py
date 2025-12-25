@@ -11,7 +11,7 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # LLM Settings
-LLM_MODEL = "gpt-5"
+LLM_MODEL = "gpt-5.1"
 
 # Video Dimensions
 REEL_WIDTH = 1080

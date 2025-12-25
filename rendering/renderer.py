@@ -1,6 +1,7 @@
-"""Manim renderer that executes a single LLM-generated scene."""
+"""Manim renderer that tracks SFX markers and their timestamps."""
 
 import json
+import re
 from pathlib import Path
 from manim import *
 
@@ -12,16 +13,38 @@ config.background_color = BLACK
 
 
 class DynamicScene(Scene):
-    """Scene that executes a single LLM-generated Manim code block."""
+    """Scene that executes LLM-generated code and tracks SFX timestamps."""
     
     def __init__(self, manim_code: str, **kwargs):
         super().__init__(**kwargs)
         self.manim_code = manim_code
+        self.sfx_events = []  # List of (timestamp, sfx_type)
+        self.current_time = 0.0
+    
+    def play(self, *args, **kwargs):
+        """Override play to track timing."""
+        run_time = kwargs.get('run_time', 1.0)
+        super().play(*args, **kwargs)
+        self.current_time += run_time
+    
+    def wait(self, duration=1.0, **kwargs):
+        """Override wait to track timing."""
+        super().wait(duration, **kwargs)
+        self.current_time += duration
+    
+    def sfx(self, sfx_type: str):
+        """Record an SFX event at current timestamp."""
+        self.sfx_events.append((self.current_time, sfx_type))
     
     def construct(self):
+        # Fix common LLM bug: nested def construct(self):
+        fixed_code = self._fix_nested_construct(self.manim_code)
+        
+        # Parse SFX markers from code and inject sfx() calls
+        processed_code = self._inject_sfx_tracking(fixed_code)
+        
         try:
-            # Execute the LLM-generated code
-            exec(self.manim_code, {
+            exec(processed_code, {
                 # Manim classes
                 'Text': Text,
                 'MathTex': MathTex,
@@ -41,24 +64,17 @@ class DynamicScene(Scene):
                 'Polygon': Polygon,
                 'RegularPolygon': RegularPolygon,
                 'Arc': Arc,
-                'ArcBetweenPoints': ArcBetweenPoints,
-                'Angle': Angle,
+                'Sector': Sector,
+                'AnnularSector': AnnularSector,
+                'Annulus': Annulus,
                 'Dot': Dot,
                 'NumberLine': NumberLine,
                 'Axes': Axes,
                 'NumberPlane': NumberPlane,
-                'CoordinateSystem': CoordinateSystem,
-                'Matrix': Matrix,
-                'IntegerMatrix': IntegerMatrix,
-                'DecimalMatrix': DecimalMatrix,
                 'Brace': Brace,
-                'BraceBetweenPoints': BraceBetweenPoints,
                 'SurroundingRectangle': SurroundingRectangle,
                 'BackgroundRectangle': BackgroundRectangle,
                 'Cross': Cross,
-                'Annulus': Annulus,
-                'Sector': Sector,
-                'AnnularSector': AnnularSector,
                 # Animations
                 'Write': Write,
                 'Create': Create,
@@ -94,8 +110,6 @@ class DynamicScene(Scene):
                 'UR': UR,
                 'DL': DL,
                 'DR': DR,
-                'IN': IN,
-                'OUT': OUT,
                 'PI': PI,
                 'TAU': TAU,
                 'DEGREES': DEGREES,
@@ -109,6 +123,11 @@ class DynamicScene(Scene):
                 'GREY_C': GREY_C,
                 'GREY_D': GREY_D,
                 'GREY_E': GREY_E,
+                'GRAY_A': GRAY_A,
+                'GRAY_B': GRAY_B,
+                'GRAY_C': GRAY_C,
+                'GRAY_D': GRAY_D,
+                'GRAY_E': GRAY_E,
                 'RED': RED,
                 'RED_A': RED_A,
                 'RED_B': RED_B,
@@ -137,6 +156,11 @@ class DynamicScene(Scene):
                 'PINK': PINK,
                 'PURPLE': PURPLE,
                 'TEAL': TEAL,
+                'TEAL_A': TEAL_A,
+                'TEAL_B': TEAL_B,
+                'TEAL_C': TEAL_C,
+                'TEAL_D': TEAL_D,
+                'TEAL_E': TEAL_E,
                 'GOLD': GOLD,
                 'MAROON': MAROON,
                 # Scene reference
@@ -152,21 +176,16 @@ class DynamicScene(Scene):
                 'tuple': tuple,
                 'enumerate': enumerate,
                 'zip': zip,
-                'map': map,
-                'filter': filter,
                 'abs': abs,
                 'min': min,
                 'max': max,
                 'sum': sum,
-                'sorted': sorted,
-                'reversed': reversed,
                 # Numpy
                 'np': np,
             })
         except Exception as e:
-            # If code fails, show a simple error and the concept
             print(f"Manim code execution error: {e}")
-            error_msg = Text(f"Animation error: {str(e)[:50]}", font_size=28, color=RED)
+            error_msg = Text(f"Error: {str(e)[:50]}", font_size=28, color=RED)
             self.play(FadeIn(error_msg))
             self.wait(2)
             self.play(FadeOut(error_msg))
@@ -175,10 +194,64 @@ class DynamicScene(Scene):
         self.wait(0.3)
         if self.mobjects:
             self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.5)
+    
+    def _fix_nested_construct(self, code: str) -> str:
+        """Remove accidental nested 'def construct(self):' from LLM output."""
+        import re
+        
+        # Check if code starts with 'def construct(self):'
+        lines = code.split('\n')
+        
+        # Find and remove 'def construct(self):' line
+        new_lines = []
+        found_construct = False
+        
+        for line in lines:
+            if line.strip() == 'def construct(self):' and not found_construct:
+                found_construct = True
+                continue  # Skip this line
+            new_lines.append(line)
+        
+        if not found_construct:
+            return code
+        
+        # Now dedent everything by 4 spaces if they all start with 4+ spaces
+        result_lines = []
+        for line in new_lines:
+            if line.startswith('    '):
+                result_lines.append(line[4:])
+            elif line.strip() == '':
+                result_lines.append(line)
+            else:
+                result_lines.append(line)
+        
+        return '\n'.join(result_lines)
+    
+    def _inject_sfx_tracking(self, code: str) -> str:
+        """Find # SFX: markers and inject sfx() calls after each play()."""
+        lines = code.split('\n')
+        new_lines = []
+        
+        for line in lines:
+            new_lines.append(line)
+            
+            # Check for SFX marker
+            sfx_match = re.search(r'#\s*SFX:\s*(\w+)', line)
+            if sfx_match and 'self.play(' in line:
+                sfx_type = sfx_match.group(1).lower()
+                # Add sfx call after this line
+                indent = len(line) - len(line.lstrip())
+                new_lines.append(' ' * indent + f'self.sfx("{sfx_type}")')
+        
+        return '\n'.join(new_lines)
 
 
-def render_from_plan(visual_plan_path: Path, output_path: Path = None) -> Path:
-    """Render Manim video from visual plan."""
+def render_from_plan(visual_plan_path: Path, output_path: Path = None) -> tuple:
+    """Render Manim video and return SFX events.
+    
+    Returns:
+        Tuple of (video_path, sfx_events)
+    """
     with open(visual_plan_path) as f:
         data = json.load(f)
     
@@ -186,7 +259,6 @@ def render_from_plan(visual_plan_path: Path, output_path: Path = None) -> Path:
     if isinstance(data, dict):
         manim_code = data.get("manim_code", "")
     else:
-        # Old format - not supported
         manim_code = "self.play(Write(Text('Upgrade to new format', color=WHITE)))"
     
     output_dir = visual_plan_path.parent
@@ -205,6 +277,11 @@ def render_from_plan(visual_plan_path: Path, output_path: Path = None) -> Path:
     scene = DynamicScene(manim_code)
     scene.render()
     
+    # Save SFX events
+    sfx_path = output_dir / "sfx_events.json"
+    with open(sfx_path, 'w') as f:
+        json.dump(scene.sfx_events, f, indent=2)
+    
     # Find and move output
     possible = list(output_dir.glob("*.mp4")) + list(media_dir.glob("**/*.mp4"))
     if possible:
@@ -213,4 +290,4 @@ def render_from_plan(visual_plan_path: Path, output_path: Path = None) -> Path:
             import shutil
             shutil.move(str(actual), str(output_path))
     
-    return output_path
+    return output_path, scene.sfx_events
