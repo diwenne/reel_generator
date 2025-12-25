@@ -1,0 +1,17 @@
+Queue! The easiest data structure to picture.
+
+Here’s the hook. It’s like a line at a coffee shop.
+First in. First out.
+No cutting.
+
+Core idea: you add to the back. That’s ENQUEUE.
+You remove from the front. That’s DEQUEUE.
+
+Quick example.
+We enqueue A, then B, then C.
+Now the front is A.
+So when we dequeue, A leaves first.
+Then B.
+
+Takeaway: Queues are FIFO.
+Perfect for tasks, printers, and messages.

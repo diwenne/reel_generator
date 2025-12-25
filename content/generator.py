@@ -1,14 +1,13 @@
-"""Content generator using GPT - outputs Manim scene code only."""
+"""Content generator using GPT or Gemini - outputs Manim scene code only."""
 
 import json
 from pathlib import Path
 from dataclasses import dataclass
-from openai import OpenAI
 
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from config import OPENAI_API_KEY, LLM_MODEL, OUTPUT_DIR
+from config import OPENAI_API_KEY, GEMINI_API_KEY, LLM_MODEL, OUTPUT_DIR
 from content.prompts import COMBINED_GENERATION_PROMPT
 
 
@@ -28,27 +27,18 @@ def generate_content(
 ) -> ContentOutput:
     """Generate Manim scene code for an animation."""
     
-    if not OPENAI_API_KEY:
-        raise ValueError("OPENAI_API_KEY not set. Check your .env file.")
-    
-    client = OpenAI(api_key=OPENAI_API_KEY)
-    
     user_prompt = f"""Concept: {concept}
 Description: {description}
 Target length: {length} seconds
 
 Generate the complete Manim scene code."""
     
-    response = client.chat.completions.create(
-        model=LLM_MODEL,
-        messages=[
-            {"role": "system", "content": COMBINED_GENERATION_PROMPT},
-            {"role": "user", "content": user_prompt}
-        ],
-        response_format={"type": "json_object"}
-    )
+    # Check if using Gemini or OpenAI
+    if LLM_MODEL.startswith("gemini"):
+        content = _generate_with_gemini(user_prompt)
+    else:
+        content = _generate_with_openai(user_prompt)
     
-    content = response.choices[0].message.content
     data = json.loads(content)
     
     # Create output directory
@@ -81,3 +71,45 @@ class GeneratedScene(Scene):
         estimated_duration=data.get("estimated_duration", length),
         output_dir=reel_output_dir
     )
+
+
+def _generate_with_openai(user_prompt: str) -> str:
+    """Generate content using OpenAI API."""
+    from openai import OpenAI
+    
+    if not OPENAI_API_KEY:
+        raise ValueError("OPENAI_API_KEY not set. Check your .env file.")
+    
+    client = OpenAI(api_key=OPENAI_API_KEY)
+    
+    response = client.chat.completions.create(
+        model=LLM_MODEL,
+        messages=[
+            {"role": "system", "content": COMBINED_GENERATION_PROMPT},
+            {"role": "user", "content": user_prompt}
+        ],
+        response_format={"type": "json_object"}
+    )
+    
+    return response.choices[0].message.content
+
+
+def _generate_with_gemini(user_prompt: str) -> str:
+    """Generate content using Google Gemini API."""
+    import google.generativeai as genai
+    
+    if not GEMINI_API_KEY:
+        raise ValueError("GEMINI_API_KEY not set. Check your .env file.")
+    
+    genai.configure(api_key=GEMINI_API_KEY)
+    
+    model = genai.GenerativeModel(
+        model_name=LLM_MODEL,
+        system_instruction=COMBINED_GENERATION_PROMPT,
+        generation_config={
+            "response_mime_type": "application/json"
+        }
+    )
+    
+    response = model.generate_content(user_prompt)
+    return response.text

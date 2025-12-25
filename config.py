@@ -9,9 +9,10 @@ load_dotenv()
 
 # API Keys
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # LLM Settings
-LLM_MODEL = "gpt-5.1"
+LLM_MODEL = "gemini-3-pro-preview"
 
 # Video Dimensions
 REEL_WIDTH = 1080

@@ -44,127 +44,14 @@ class DynamicScene(Scene):
         processed_code = self._inject_sfx_tracking(fixed_code)
         
         try:
-            exec(processed_code, {
-                # Manim classes
-                'Text': Text,
-                'MathTex': MathTex,
-                'Tex': Tex,
-                'VGroup': VGroup,
-                'Group': Group,
-                'Arrow': Arrow,
-                'Line': Line,
-                'DashedLine': DashedLine,
-                'DoubleArrow': DoubleArrow,
-                'Circle': Circle,
-                'Ellipse': Ellipse,
-                'Square': Square,
-                'Rectangle': Rectangle,
-                'RoundedRectangle': RoundedRectangle,
-                'Triangle': Triangle,
-                'Polygon': Polygon,
-                'RegularPolygon': RegularPolygon,
-                'Arc': Arc,
-                'Sector': Sector,
-                'AnnularSector': AnnularSector,
-                'Annulus': Annulus,
-                'Dot': Dot,
-                'NumberLine': NumberLine,
-                'Axes': Axes,
-                'NumberPlane': NumberPlane,
-                'Brace': Brace,
-                'SurroundingRectangle': SurroundingRectangle,
-                'BackgroundRectangle': BackgroundRectangle,
-                'Cross': Cross,
-                # Animations
-                'Write': Write,
-                'Create': Create,
-                'DrawBorderThenFill': DrawBorderThenFill,
-                'FadeIn': FadeIn,
-                'FadeOut': FadeOut,
-                'GrowFromCenter': GrowFromCenter,
-                'GrowFromPoint': GrowFromPoint,
-                'GrowArrow': GrowArrow,
-                'SpinInFromNothing': SpinInFromNothing,
-                'Transform': Transform,
-                'ReplacementTransform': ReplacementTransform,
-                'TransformFromCopy': TransformFromCopy,
-                'MoveToTarget': MoveToTarget,
-                'ApplyMethod': ApplyMethod,
-                'LaggedStart': LaggedStart,
-                'LaggedStartMap': LaggedStartMap,
-                'AnimationGroup': AnimationGroup,
-                'Succession': Succession,
-                'Flash': Flash,
-                'Indicate': Indicate,
-                'Circumscribe': Circumscribe,
-                'ShowPassingFlash': ShowPassingFlash,
-                'Wiggle': Wiggle,
-                'Wait': Wait,
-                # Constants
-                'UP': UP,
-                'DOWN': DOWN,
-                'LEFT': LEFT,
-                'RIGHT': RIGHT,
-                'ORIGIN': ORIGIN,
-                'UL': UL,
-                'UR': UR,
-                'DL': DL,
-                'DR': DR,
-                'PI': PI,
-                'TAU': TAU,
-                'DEGREES': DEGREES,
-                # Colors
-                'WHITE': WHITE,
-                'BLACK': BLACK,
-                'GREY': GREY,
-                'GRAY': GRAY,
-                'GREY_A': GREY_A,
-                'GREY_B': GREY_B,
-                'GREY_C': GREY_C,
-                'GREY_D': GREY_D,
-                'GREY_E': GREY_E,
-                'GRAY_A': GRAY_A,
-                'GRAY_B': GRAY_B,
-                'GRAY_C': GRAY_C,
-                'GRAY_D': GRAY_D,
-                'GRAY_E': GRAY_E,
-                'RED': RED,
-                'RED_A': RED_A,
-                'RED_B': RED_B,
-                'RED_C': RED_C,
-                'RED_D': RED_D,
-                'RED_E': RED_E,
-                'GREEN': GREEN,
-                'GREEN_A': GREEN_A,
-                'GREEN_B': GREEN_B,
-                'GREEN_C': GREEN_C,
-                'GREEN_D': GREEN_D,
-                'GREEN_E': GREEN_E,
-                'BLUE': BLUE,
-                'BLUE_A': BLUE_A,
-                'BLUE_B': BLUE_B,
-                'BLUE_C': BLUE_C,
-                'BLUE_D': BLUE_D,
-                'BLUE_E': BLUE_E,
-                'YELLOW': YELLOW,
-                'YELLOW_A': YELLOW_A,
-                'YELLOW_B': YELLOW_B,
-                'YELLOW_C': YELLOW_C,
-                'YELLOW_D': YELLOW_D,
-                'YELLOW_E': YELLOW_E,
-                'ORANGE': ORANGE,
-                'PINK': PINK,
-                'PURPLE': PURPLE,
-                'TEAL': TEAL,
-                'TEAL_A': TEAL_A,
-                'TEAL_B': TEAL_B,
-                'TEAL_C': TEAL_C,
-                'TEAL_D': TEAL_D,
-                'TEAL_E': TEAL_E,
-                'GOLD': GOLD,
-                'MAROON': MAROON,
-                # Scene reference
+            # Build execution namespace with ALL manim exports
+            import manim
+            exec_globals = {name: getattr(manim, name) for name in dir(manim) if not name.startswith('_')}
+            
+            # Add scene reference and extras
+            exec_globals.update({
                 'self': self,
+                'np': np,
                 # Python builtins
                 'range': range,
                 'len': len,
@@ -180,15 +67,17 @@ class DynamicScene(Scene):
                 'min': min,
                 'max': max,
                 'sum': sum,
-                # Numpy
-                'np': np,
+                'sorted': sorted,
+                'reversed': reversed,
+                'bool': bool,
+                'round': round,
+                'print': print,
             })
+            
+            exec(processed_code, exec_globals)
         except Exception as e:
             print(f"Manim code execution error: {e}")
-            error_msg = Text(f"Error: {str(e)[:50]}", font_size=28, color=RED)
-            self.play(FadeIn(error_msg))
-            self.wait(2)
-            self.play(FadeOut(error_msg))
+            raise e
         
         # Final fadeout
         self.wait(0.3)
