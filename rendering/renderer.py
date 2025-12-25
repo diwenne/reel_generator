@@ -8,7 +8,7 @@ from manim import *
 # Configure for 1080x960 (top half of reel)
 config.pixel_width = 1080
 config.pixel_height = 960
-config.frame_rate = 30
+config.frame_rate = 60
 config.background_color = BLACK
 
 
@@ -52,6 +52,8 @@ class DynamicScene(Scene):
             exec_globals.update({
                 'self': self,
                 'np': np,
+                # Helper functions
+                'normalize': lambda v: v / np.linalg.norm(v) if np.linalg.norm(v) > 0 else v,
                 # Python builtins
                 'range': range,
                 'len': len,
@@ -85,10 +87,9 @@ class DynamicScene(Scene):
             self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.5)
     
     def _fix_nested_construct(self, code: str) -> str:
-        """Remove accidental nested 'def construct(self):' from LLM output."""
-        import re
+        """Remove accidental nested 'def construct(self):' and fix indentation."""
+        import textwrap
         
-        # Check if code starts with 'def construct(self):'
         lines = code.split('\n')
         
         # Find and remove 'def construct(self):' line
@@ -101,20 +102,12 @@ class DynamicScene(Scene):
                 continue  # Skip this line
             new_lines.append(line)
         
-        if not found_construct:
-            return code
+        # Rejoin, strip, and use textwrap.dedent to fix any remaining indentation
+        result = '\n'.join(new_lines)
+        result = result.strip()  # Remove leading/trailing whitespace
+        result = textwrap.dedent(result)
         
-        # Now dedent everything by 4 spaces if they all start with 4+ spaces
-        result_lines = []
-        for line in new_lines:
-            if line.startswith('    '):
-                result_lines.append(line[4:])
-            elif line.strip() == '':
-                result_lines.append(line)
-            else:
-                result_lines.append(line)
-        
-        return '\n'.join(result_lines)
+        return result
     
     def _inject_sfx_tracking(self, code: str) -> str:
         """Find # SFX: markers and inject sfx() calls after each play()."""
