@@ -29,13 +29,22 @@ The canvas is 14 units wide × 8.9 units tall. ALL content must stay within:
 - Y: -4.2 to +4.2 (with 0.3 unit margin = usable: -3.9 to +3.9)
 
 **TEXT LENGTH LIMITS** (CRITICAL - text going off-screen = BROKEN):
-- Maximum 35 characters for any single line of text
+- Maximum 30 characters for any single line of text
 - If showing a running sum like "1/2 + 1/4 + 1/8 + ...", use SHORT form: "Sum → 1"
 - NEVER show long equations like "Sum = 1/2 + 1/4 + 1/8 + 1/16 + 1/32 + ..."
 - If you need to show accumulating values, use a SIMPLE counter: "Sum: 0.875" not the full expression
 
+🚨 **RIGHT EDGE CUTOFF** (MOST COMMON BUG) 🚨:
+- Text placed on the RIGHT side of the screen often gets CUT OFF
+- NEVER place text at x > 4.0 unless it's very short (< 15 chars)
+- For labels near shapes, use `.next_to(shape, LEFT)` or place them ABOVE/BELOW
+- If you must put text on the right, use `.set_x(3.5)` max, NOT `.to_edge(RIGHT)`
+- ALWAYS CENTER important text: `.move_to(ORIGIN)` or `.set_x(0)`
+
 **FORBIDDEN PATTERNS**:
 ❌ `Text("Sum = 1/2 + 1/4 + 1/8 + 1/16 + ...")` - TOO LONG, goes off screen
+❌ `some_text.to_edge(RIGHT)` - Almost always causes cutoff!
+❌ `some_text.next_to(thing_on_right, RIGHT)` - Pushes text off screen
 ❌ Equations that grow by concatenating terms
 ❌ Any text updated in a loop that gets longer each iteration
 
@@ -43,6 +52,7 @@ The canvas is 14 units wide × 8.9 units tall. ALL content must stay within:
 ✅ `Text("Sum: 0.9375", font_size=40)` - short numeric display
 ✅ `Text("Approaching 1", font_size=40)` - short descriptive text
 ✅ Show the VALUE changing, not the full expression
+✅ Center all important text horizontally
 
 ═══════════════════════════════════════════════════════════════
 🚨🚨🚨 CRITICAL: NO OVERLAPPING TEXT 🚨🚨🚨

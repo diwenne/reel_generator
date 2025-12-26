@@ -38,7 +38,8 @@ def create_full_reel(
     youtube_start: float = 0,
     length: int = 60,
     output_name: str = None,
-    youtube_volume: float = YOUTUBE_VOLUME
+    youtube_volume: float = YOUTUBE_VOLUME,
+    youtube_fade_in: float = 1.0
 ) -> Path:
     """
     Create a complete reel with math animation on top and YouTube video on bottom.
@@ -50,7 +51,8 @@ def create_full_reel(
         youtube_start: Start time in seconds for the YouTube clip (default 0)
         length: Target length in seconds (default 60) - used as hint for AI
         output_name: Name for the output (defaults to concept slug)
-        youtube_volume: Volume level for YouTube audio (0.0-1.0, default 0.3)
+        youtube_volume: Volume level for YouTube audio (0.0-1.0, default 0.2)
+        youtube_fade_in: Duration in seconds for YouTube video/audio fade-in (default 1.0)
     
     Returns:
         Path to the final combined video
@@ -94,7 +96,7 @@ def create_full_reel(
     )
     
     # Step 4: Stack the videos vertically with reduced YouTube volume
-    print(f"\nStep 4/4: Stacking videos (YouTube volume: {youtube_volume*100:.0f}%)...")
+    print(f"\nStep 4/4: Stacking videos (YouTube volume: {youtube_volume*100:.0f}%, fade-in: {youtube_fade_in}s)...")
     final_path = reel_dir / "final.mp4"
     
     # Filter: add black safe zone bar on top and bottom buffer below animation.
@@ -103,13 +105,17 @@ def create_full_reel(
     #   - Top: SAFE_ZONE_HEIGHT (100px) black bar
     #   - Bottom: BOTTOM_BUFFER_HEIGHT (60px) black bar
     # Then stack YouTube video (YOUTUBE_HEIGHT) below.
+    # YouTube video gets a fade-in effect (both video and audio)
     top_section_height = SAFE_ZONE_HEIGHT + ANIMATION_HEIGHT + BOTTOM_BUFFER_HEIGHT
+    fade_out_start = max(0, actual_duration - youtube_fade_in)  # Start fade-out 1s before end
     filter_complex = (
         f"[0:v]pad={REEL_WIDTH}:{top_section_height}:0:{SAFE_ZONE_HEIGHT}:black[padded];"
         f"[padded]pad={REEL_WIDTH}:{top_section_height}:0:0:black[top];"
-        f"[1:v]trim=duration={actual_duration},setpts=PTS-STARTPTS,scale={REEL_WIDTH}:{YOUTUBE_HEIGHT}[bottom];"
+        f"[1:v]trim=duration={actual_duration},setpts=PTS-STARTPTS,scale={REEL_WIDTH}:{YOUTUBE_HEIGHT},"
+        f"fade=t=in:st=0:d={youtube_fade_in},fade=t=out:st={fade_out_start}:d={youtube_fade_in}[bottom];"
         f"[top][bottom]vstack=inputs=2[v];"
-        f"[1:a]atrim=duration={actual_duration},asetpts=PTS-STARTPTS,volume={youtube_volume}[a]"
+        f"[1:a]atrim=duration={actual_duration},asetpts=PTS-STARTPTS,volume={youtube_volume},"
+        f"afade=t=in:st=0:d={youtube_fade_in},afade=t=out:st={fade_out_start}:d={youtube_fade_in}[a]"
     )
     
     stack_cmd = [
