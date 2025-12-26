@@ -2,6 +2,8 @@
 
 This guide is designed for LLMs to understand how to run the reel generation pipeline effectively.
 
+NOTE: DONT EASILY CHANGE content/prompts.py, instead TUNE THE TERMINAL DESCRIPTIVE PARAMETER
+
 ## 🚀 Environment Setup
 
 Always start by activating the virtual environment:
