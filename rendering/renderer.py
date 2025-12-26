@@ -5,9 +5,10 @@ import re
 from pathlib import Path
 from manim import *
 
-# Configure for 1080x960 (top half of reel)
+# Configure for 1080x760 animation area (200px safe zone added during compositing)
+# Total top half is 960px, but we render 760px and add 200px black bar later
 config.pixel_width = 1080
-config.pixel_height = 960
+config.pixel_height = 760
 config.frame_rate = 60
 config.background_color = BLACK
 
@@ -52,9 +53,14 @@ class DynamicScene(Scene):
             exec_globals.update({
                 'self': self,
                 'np': np,
-                # Common LLM mistakes: BOTTOM/TOP don't exist in Manim
+                # Common LLM mistakes: these don't exist in Manim
                 'BOTTOM': DOWN,
                 'TOP': UP,
+                # Corner aliases (LLMs often use these)
+                'BL': DL,  # Bottom-left
+                'BR': DR,  # Bottom-right
+                'TL': UL,  # Top-left
+                'TR': UR,  # Top-right
                 # Helper functions
                 'normalize': lambda v: v / np.linalg.norm(v) if np.linalg.norm(v) > 0 else v,
                 # Python builtins

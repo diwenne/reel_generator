@@ -35,7 +35,10 @@ def produce_reel():
     
     output_name = args.output
     if output_name is None:
+        # Sanitize: lowercase, replace spaces with underscores, remove special chars
+        import re
         output_name = args.concept.lower().replace(" ", "_")
+        output_name = re.sub(r'[^a-z0-9_]', '', output_name)  # Keep only alphanumeric and underscore
     
     # Setup clean production output directory
     prod_dir = PRODUCTION_OUTPUT / output_name
@@ -66,8 +69,15 @@ def produce_reel():
     # Step 2: Copy final video to clean production directory
     print("\nStep 2/3: Copying to production output...")
     prod_video = prod_dir / "reel.mp4"
+    prod_dir.mkdir(parents=True, exist_ok=True)  # Ensure directory exists (safety)
     shutil.copy(final_video_path, prod_video)
     print(f"  Video: {prod_video}")
+    
+    # Save the prompt used for this generation
+    from content.prompts import COMBINED_GENERATION_PROMPT
+    prompt_path = prod_dir / "prompt_used.txt"
+    prompt_path.write_text(COMBINED_GENERATION_PROMPT)
+    print(f"  Prompt saved: {prompt_path}")
     
     # Step 3: Generate Caption/Metadata with YouTube credit
     print("\nStep 3/3: Generating caption & metadata...")

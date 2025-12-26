@@ -29,9 +29,10 @@ def generate_content(
     
     user_prompt = f"""Concept: {concept}
 Description: {description}
-Target length: {length} seconds
+Target length: {length} seconds MINIMUM. Use the FULL time to explain thoroughly. Don't rush.
 
 Generate the complete Manim scene code."""
+
     
     # Check if using Gemini or OpenAI
     if LLM_MODEL.startswith("gemini"):

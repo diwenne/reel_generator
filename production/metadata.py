@@ -31,23 +31,27 @@ def generate_caption(concept: str, description: str, youtube_url: str) -> str:
     )
     
     prompt = f"""
-    Create an engaging Instagram Reel caption.
+    Create an Instagram Reel caption.
     
     CONTEXT:
     - Background Gameplay Video Title: {yt_title}
     
-    2. BODY: A MASTERPIECE of sophisticated, formal prose describing the history of the level/game ({yt_title}).
-       - Style: Academic, documentary-style, highly sophisticated.
-       - Focus: Use words like "legacy," "monumental," "iconic," "notorious."
-       - Write at least 200 words.
-       - DO NOT give credit to the background video url. Focus on the game history itself.
+    REQUIREMENTS:
+    1. TITLE: Short, catchy title about the game/level (not the math concept)
+    
+    2. BODY: Write a short, formal description of the game/level ({yt_title}).
+       - Style: Simple, clean, formal. NOT flowery or overly sophisticated.
+       - Keep it factual and straightforward.
+       - 2-3 short paragraphs max (100-150 words total).
+       - DO NOT give credit to the background video url.
        - DO NOT mention the math concept.
-    3. HASHTAGS: 15-20 relevant hashtags found on the gaming/history side (#geometrydash #history #gaming #documentary etc).
+    
+    3. HASHTAGS: 15-20 relevant gaming hashtags (#geometrydash #gaming etc)
     
     OUTPUT FORMAT:
     [Title]
     
-    [Long Formal History Paragraph]
+    [Short Formal Description]
     
     [Hashtags]
     """

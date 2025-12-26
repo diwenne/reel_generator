@@ -97,9 +97,11 @@ def create_full_reel(
     print(f"\nStep 4/4: Stacking videos (YouTube volume: {youtube_volume*100:.0f}%)...")
     final_path = reel_dir / "final.mp4"
     
-    # Filter: scale both videos, trim YouTube to exact duration, stack vertically, reduce YouTube audio volume
+    # Filter: add black safe zone bar on top of animation (760px -> 960px), 
+    # scale YouTube, trim to exact duration, stack vertically, reduce YouTube audio volume
+    # The 200px black bar provides safe zone for Instagram "Friends" overlay
     filter_complex = (
-        f"[0:v]scale={REEL_WIDTH}:{HALF_HEIGHT}[top];"
+        f"[0:v]scale={REEL_WIDTH}:760,pad={REEL_WIDTH}:{HALF_HEIGHT}:0:200:black[top];"
         f"[1:v]trim=duration={actual_duration},setpts=PTS-STARTPTS,scale={REEL_WIDTH}:{HALF_HEIGHT}[bottom];"
         f"[top][bottom]vstack=inputs=2[v];"
         f"[1:a]atrim=duration={actual_duration},asetpts=PTS-STARTPTS,volume={youtube_volume}[a]"

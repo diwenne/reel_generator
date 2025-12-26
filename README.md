@@ -374,3 +374,12 @@ python -m production.produce \
  --url "https://www.youtube.com/watch?v=J90L73YOR3k" \
  --start 0 \
  --output "infinite_sum_v3_fixed"
+
+# 1. Infinite Sum = 1 (0-25s)
+
+python -m production.produce \
+ --concept "Infinite Sum Equals One" \
+ --description "Visually prove that 1/2 + 1/4 + 1/8 + ... = 1. Start with a unit square. Fill half (left). Then fill half of the remaining right side (top right). Then fill half of the remaining bottom right. Continue this spiral pattern. Shape value labels like 1/2, 1/4 go INSIDE each shape. Title must have large gap from content." \
+ --url "https://www.youtube.com/watch?v=J90L73YOR3k" \
+ --start 0 \
+ --output "infinite_sum_prod"

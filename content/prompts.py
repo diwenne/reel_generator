@@ -9,6 +9,9 @@ PHILOSOPHY:
 TECHNICAL RULES:
 - Write ONE complete construct() method body
 - Use Text() for everything (no MathTex/Tex — requires LaTeX)
+- No 3D (no ThreeDAxes, OUT, IN, set_camera_orientation)
+- Use AnnularSector(inner_radius=0, outer_radius=r) for pie wedges, Arc() for angle indicators
+
 STRICT ADHERENCE & CREATIVITY:
 - If the description is detailed, FOLLOW IT EXACTLY.
 - If the description is high-level (e.g., "Show Pythagoras"), YOU MUST DESIGN the visual steps yourself.
@@ -16,127 +19,158 @@ STRICT ADHERENCE & CREATIVITY:
 - DO NOT just flash text. animate objects, transform shapes, and build intuition.
 
 ═══════════════════════════════════════════════════════════════
-🚨🚨🚨 SPACING IS THE #1 PRIORITY - READ THIS CAREFULLY 🚨🚨🚨
+TEXT POSITIONING, SIZING & SPACE EFFICIENCY (CRITICAL)
 ═══════════════════════════════════════════════════════════════
 
-**ABSOLUTE RULE**: TITLES AND EXPLANATORY TEXT MUST NEVER OVERLAP SHAPES.
-If a title or sentence overlaps a shape, the animation is BROKEN.
+**USE THE FULL CANVAS** - Don't leave empty black space!
+- The canvas is approximately 14 units wide × 8 units tall
+- Main visuals should be LARGE: use width/height of 4-6 units, NOT tiny 2-unit shapes
+- Fill at least 60-70% of the available space with your visualization
+- Small centered shapes with lots of black space = BAD
 
-WHAT'S ALLOWED vs FORBIDDEN:
-✅ ALLOWED: Shape value labels (like "1/2", "1/4") can be CENTERED INSIDE their shapes - this is intentional labeling
-❌ FORBIDDEN: Titles, questions, or explanatory sentences overlapping with ANY shape
-
-THREE CRITICAL SPACING REQUIREMENTS:
-
-1️⃣ **TITLE MUST BE FAR FROM CONTENT**
-   - Title goes at TOP with buff=0.5 minimum
-   - Main content must be shifted DOWN significantly (DOWN * 0.5 or more)
-   - There must be VISIBLE BLACK SPACE between title and any shape
-
-2️⃣ **SHAPE VALUE LABELS CAN GO INSIDE SHAPES**
-   - Labels like "1/2", "1/4", "A", "B" can be centered inside their shapes using .move_to(shape.get_center())
-   - This is intentional - it helps identify what each shape represents
-   - Make sure font_size is appropriate for the shape size
-
-3️⃣ **USE SPACE EFFICIENTLY - MAXIMIZE VISUAL REAL ESTATE**
-   - Shapes should be as LARGE as possible while maintaining proper spacing from title
-   - Don't waste canvas space - use the full 14×8 unit area effectively
-   - Scale shapes to fill available space, but ALWAYS maintain gaps from title/explanatory text
+MINIMUM FONT SIZES (for readability on mobile):
+- Titles: font_size=48 or larger (NOT 36 or 40!)
+- Labels on shapes: font_size=40 minimum (NEVER smaller than 36)
+- Explanatory text: font_size=36 minimum
+- Small labels (like fractions): font_size=36 minimum
 
 ═══════════════════════════════════════════════════════════════
-LAYOUT RULES (MANDATORY - NO EXCEPTIONS)
+🚨🚨🚨 SPACING IS CRITICAL - TEXT MUST NOT TOUCH SHAPES 🚨🚨🚨
 ═══════════════════════════════════════════════════════════════
 
-**FORBIDDEN**: 
-- Manual coordinates like `UP * 1.5 + RIGHT * 2.1` → causes overlaps
-- Titles or sentences placed at same position as a shape
-- Explanatory text overlapping with shapes
+ABSOLUTE RULES:
+✅ ALLOWED: Shape VALUE LABELS (like "1/2", "1/4") CENTERED INSIDE their shapes
+❌ FORBIDDEN: Any title, equation, or text TOUCHING or within 0.5 units of any shape edge
 
-**MANDATORY POSITIONING**:
-- `.move_to(shape.get_center())` for VALUE LABELS inside shapes (this is CORRECT!)
-- `.next_to(target, RIGHT/LEFT/UP/DOWN, buff=0)` for perfect tiling of shapes
-- `.to_edge(UP, buff=0.5)` for titles with proper spacing
-- `.arrange(direction, buff=SMALL_BUFF)` for groups
-- `.align_to(target, direction)` for alignment
+**SPACING REQUIREMENTS** (non-negotiable):
+- There must be VISIBLE BLACK SPACE (at least 0.5 units) between title and shapes
+- There must be VISIBLE BLACK SPACE (at least 0.5 units) between shapes and bottom text
+- If text appears to touch a shape, THE ANIMATION IS BROKEN
 
-LABEL PLACEMENT EXAMPLES:
+THREE ZONES - keep shapes AWAY from zone boundaries:
+1️⃣ **TOP ZONE (y > 3.0)**: Title only → `.to_edge(UP, buff=0.3)` 
+2️⃣ **CENTER ZONE (-2.0 < y < 2.5)**: Main visuals - keep shapes in this zone!
+3️⃣ **BOTTOM ZONE (y < -2.5)**: Equations, sums → `.to_edge(DOWN, buff=0.3)`
+
+**SHAPE SIZING FOR PROPER GAPS**:
+- Maximum shape height: 4.0 units (NOT 5 or larger!)
+- Position main shapes at: `.move_to(UP * 0.3)` to center them between title and bottom text
+- This leaves ~1 unit gap from title and ~1 unit gap from bottom text
+
+POSITIONING RULES:
+- Titles: `.to_edge(UP, buff=0.3)` - sits at y ≈ 3.5
+- Main shapes: `.move_to(UP * 0.3)` or `.move_to(ORIGIN)` - center them in the safe zone
+- Bottom text: `.to_edge(DOWN, buff=0.3)` - sits at y ≈ -3.5
+- Value labels: `.move_to(shape.get_center())` - INSIDE shapes is correct!
+
+EXAMPLES:
 ```python
-# ✅ CORRECT: Value label INSIDE the shape (intentional labeling)
-square = Square(side_length=2, fill_opacity=0.7, color=BLUE)
-label = Text("1/4", font_size=36).move_to(square.get_center())  # Centered inside - GOOD!
+# ✅ CORRECT: Proper spacing with gaps
+title = Text("Why does 1/2 + 1/4 + ... = 1?", font_size=48).to_edge(UP, buff=0.3)
+main_square = Square(side_length=4).move_to(UP * 0.3)  # Centered with room for title above and text below
+value_label = Text("1", font_size=48).move_to(main_square.get_center())
+sum_equation = Text("Sum = 1/2 + 1/4", font_size=40).to_edge(DOWN, buff=0.3)
+# Result: ~1 unit gap above shape, ~1 unit gap below shape ✓
 
-# ✅ CORRECT: Multiple shapes with labels inside each
-left_half = Rectangle(width=2.5, height=5, fill_opacity=0.7, color=BLUE)
-right_half = Rectangle(width=2.5, height=5, fill_opacity=0.5, color=GREEN).next_to(left_half, RIGHT, buff=0)
-label_left = Text("1/2", font_size=48).move_to(left_half.get_center())  # Inside left shape
-label_right = Text("1/2", font_size=48).move_to(right_half.get_center())  # Inside right shape
-
-# ❌ WRONG: TITLE overlapping with shape
-title = Text("How does this work?", font_size=48).move_to(ORIGIN)
-square = Square(side_length=4).move_to(ORIGIN)  # BROKEN - title overlaps shape!
+# ❌ WRONG: Shape too big, touches title and bottom text
+main_square = Square(side_length=5.5).move_to(ORIGIN)  # Too big! Will touch title and bottom text
 ```
 
-TITLE AND CONTENT SPACING:
+SCALING EXAMPLES:
 ```python
-# ✅ CORRECT: Title with LARGE gap, content shifted down
-title = Text("How does 1/2 + 1/4 + ... = 1?", font_size=48).to_edge(UP, buff=0.5)
-main_shape = Square(side_length=4).move_to(ORIGIN).shift(DOWN * 0.3)  # Shifted DOWN!
-shape_label = Text("1", font_size=48).move_to(main_shape.get_center())  # Label inside - OK!
-# Result: visible gap between title and shape, label correctly inside
+# GOOD: Large shape that uses space well
+square = Square(side_length=5, color=BLUE)  # 5 units - fills space nicely
 
-# ❌ WRONG: Shape too close to title
-title = Text("Question?", font_size=48).to_edge(UP, buff=0.3)
-main_shape = Square(side_length=5).move_to(ORIGIN)  # Will touch title!
+# BAD: Tiny shape with wasted space
+square = Square(side_length=2, color=BLUE)  # 2 units - way too small!
+
+# GOOD: Big readable title
+title = Text("Why does this equal 1?", font_size=52).to_edge(UP, buff=0.5)
+
+# BAD: Tiny title lost in space
+title = Text("Why does this equal 1?", font_size=36).to_edge(UP)  # TOO SMALL
 ```
 
-CANVAS LAYOUT (14 units wide × 8 units tall):
-- Title zone: top edge with buff=0.5 (y ≈ 3.5)
-- Main visual zone: y = -0.5 to 2.0 (shifted DOWN from center)
-- Bottom text zone: bottom edge with buff=0.5 (y ≈ -3.5)
-- ALWAYS leave visible gaps between zones!
+═══════════════════════════════════════════════════════════════
+DRAWING ANGLES (CRITICAL - follow exactly)
+═══════════════════════════════════════════════════════════════
 
-FONT SIZES (minimum):
-- Titles: 48+
-- Labels: 40+
-- All text: never smaller than 36
+For angles at triangle vertices, use Angle() from manim:
+```python
+from manim import Angle
 
-VISUAL SIZE:
-- Main shapes: 4-5 units (not tiny 2-unit shapes)
-- Position shapes with .shift(DOWN * 0.3) to create gap from title
+# Triangle vertices
+A = np.array([-2, -1, 0])
+B = np.array([2, -1, 0])  
+C = np.array([0, 1.5, 0])
+
+# Create triangle
+triangle = Polygon(A, B, C, color=BLUE)
+
+# Create angles - Angle() handles the math for you
+# Angle(line1, line2) where lines meet at the vertex
+line_AB = Line(A, B)
+line_AC = Line(A, C)
+line_BA = Line(B, A)
+line_BC = Line(B, C)
+line_CA = Line(C, A)
+line_CB = Line(C, B)
+
+# Angle at A (between AB and AC)
+angle_a = Angle(line_AB, line_AC, radius=0.4, color=YELLOW)
+label_a = Text("a", font_size=24, color=YELLOW)
+label_a.move_to(angle_a.point_from_proportion(0.5) + (A - angle_a.point_from_proportion(0.5)) * -0.5)
+
+# Angle at B (between BA and BC)  
+angle_b = Angle(line_BA, line_BC, radius=0.4, color=GREEN)
+label_b = Text("b", font_size=24, color=GREEN)
+label_b.move_to(angle_b.point_from_proportion(0.5) + (B - angle_b.point_from_proportion(0.5)) * -0.5)
+
+# Angle at C (between CA and CB)
+angle_c = Angle(line_CA, line_CB, radius=0.4, color=RED)
+label_c = Text("c", font_size=24, color=RED)
+label_c.move_to(angle_c.point_from_proportion(0.5) + (C - angle_c.point_from_proportion(0.5)) * -0.5)
+```
+
+CRITICAL: Labels go OUTSIDE the angle arc, not inside. Push them away from the vertex.
 
 ═══════════════════════════════════════════════════════════════
 STRUCTURE
 ═══════════════════════════════════════════════════════════════
 
-1. HOOK: Question title at top
+1. HOOK: Question title, then shrink to top
 ```python
-title = Text("Why does this equal 1?", font_size=48).to_edge(UP, buff=0.4)
+title = Text("Why do triangle angles sum to 180°?", font_size=44)
 self.play(Write(title))
 self.wait(1.5)
+self.play(title.animate.scale(0.5).to_edge(UP))
 ```
 
-2. BUILD: Show visuals step by step (keep shapes shifted DOWN from title!)
+2. BUILD: Show visuals step by step with waits between
 
 3. REVEAL: The "aha" moment
 
-4. FINALE: **MORPH everything into the final equation**
+4. CONCLUDE: **DRAMATIC FINALE** - This is the most important part!
 ```python
-# Group all visual elements
-all_visuals = VGroup(shape, labels, other_elements)
+# Clear EVERYTHING from screen first
+self.play(
+    FadeOut(shape), FadeOut(labels), FadeOut(title),
+    run_time=0.5
+)
 
-# Create big centered final equation  
-final = Text("1/2 + 1/4 + ... = 1", font_size=64, color=YELLOW).move_to(ORIGIN)
-
-# MORPH the visuals into the equation (don't just fade!)
-self.play(FadeOut(title))
-self.play(ReplacementTransform(all_visuals, final), run_time=2)
-self.wait(3)
+# Show BIG, centered final equation - this is the payoff!
+final = Text("1/2 + 1/4 + 1/8 + ... = 1", font_size=64, color=YELLOW)
+final.move_to(ORIGIN)  # Dead center of screen
+self.play(Write(final), run_time=1.5)
+self.wait(3)  # Let it sink in!
 ```
 
-**FINALE MUST**:
-- Use ReplacementTransform to MORPH visuals into equation
-- Final equation: font_size=60-72, centered at ORIGIN
-- Hold for 3+ seconds
+**FINALE REQUIREMENTS**:
+- FadeOut ALL visuals before showing final equation
+- Final equation should be font_size=60-72 (HUGE)
+- Position at ORIGIN (center of screen)
+- Use a highlight color like YELLOW or GREEN
+- Hold for 3+ seconds at the end
 
 ═══════════════════════════════════════════════════════════════
 PACING
