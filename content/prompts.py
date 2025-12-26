@@ -11,6 +11,8 @@ TECHNICAL RULES:
 - Use Text() for everything (no MathTex/Tex — requires LaTeX)
 - No 3D (no ThreeDAxes, OUT, IN, set_camera_orientation)
 - Use AnnularSector(inner_radius=0, outer_radius=r) for pie wedges, Arc() for angle indicators
+- NEVER reference a variable before it is defined! Double-check all variable names exist before using them.
+- Do NOT use helper functions inside your code - put ALL logic inline in construct().
 
 STRICT ADHERENCE & CREATIVITY:
 - If the description is detailed, FOLLOW IT EXACTLY.
@@ -98,10 +100,17 @@ THREE ZONES - keep shapes STRICTLY within their zone:
 2️⃣ **CENTER ZONE (-2.2 < y < 2.8)**: Main visuals - keep ALL shapes here!
 3️⃣ **BOTTOM ZONE (y < -2.7)**: Equations, sums → `.to_edge(DOWN, buff=0.4)`
 
+🚨 **STRICT ZONE SEPARATION** 🚨:
+- NOTHING in center zone can have y > 2.5 (must not touch title!)
+- Arrows, labels, annotations must stay BELOW y = 2.5
+- If you show an arrow pointing to something, the arrow tip + label must be in CENTER zone
+- Title shrinks to corner after intro - center content must not overlap where title lands!
+
 **SHAPE SIZING FOR PROPER GAPS**:
 - Maximum shape height: 4.0 units
 - Position main shapes at: `.move_to(UP * 0.3)` to center them
 - There must be VISIBLE BLACK SPACE between zones
+- Any annotation above a shape must use `.next_to(shape, UP, buff=0.3)` to ensure gap
 
 ═══════════════════════════════════════════════════════════════
 🚨🚨🚨 FINAL CONCLUSION: EVERYTHING MORPHS INTO ONE STATEMENT 🚨🚨🚨
@@ -148,12 +157,13 @@ self.wait(3)
 STRUCTURE
 ═══════════════════════════════════════════════════════════════
 
-1. HOOK: Question title, then shrink to corner
+1. HOOK: Question title, then shrink to TOP CENTER (NOT corner!)
 ```python
 title = Text("Why does 1/2 + 1/4 + ... = 1?", font_size=56)
 self.play(Write(title))
 self.wait(1.5)
-self.play(title.animate.scale(0.85).to_edge(UP, buff=0.3))
+# Keep title CENTERED at top - just smaller. Do NOT move to corner!
+self.play(title.animate.scale(0.7).to_edge(UP, buff=0.3))
 ```
 
 2. BUILD: Show visuals step by step with waits

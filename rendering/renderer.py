@@ -85,7 +85,9 @@ class DynamicScene(Scene):
                 'print': print,
             })
             
-            exec(processed_code, exec_globals)
+            # Pass exec_globals as both globals AND locals so nested functions
+            # can access variables defined in the outer scope
+            exec(processed_code, exec_globals, exec_globals)
         except Exception as e:
             print(f"Manim code execution error: {e}")
             raise e
@@ -96,21 +98,31 @@ class DynamicScene(Scene):
             self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.5)
     
     def _fix_nested_construct(self, code: str) -> str:
-        """Remove accidental nested 'def construct(self):' and fix indentation."""
+        """Remove class wrapper, construct definition, imports, and fix indentation."""
         import textwrap
+        import re
         
         lines = code.split('\n')
-        
-        # Find and remove 'def construct(self):' line
         new_lines = []
-        found_construct = False
+        skip_next_indent_block = False
+        class_indent = None
         
         for line in lines:
             stripped = line.strip()
-            # Match various forms of construct definition
-            if stripped in ('def construct(self):', 'def construct(self) -> None:') and not found_construct:
-                found_construct = True
-                continue  # Skip this line
+            
+            # Skip import statements
+            if stripped.startswith('from manim import') or stripped.startswith('import manim'):
+                continue
+            
+            # Skip class definition lines like "class BinarySearchVis(Scene):"
+            if re.match(r'^class\s+\w+\s*\(.*Scene.*\)\s*:', stripped):
+                class_indent = len(line) - len(line.lstrip())
+                continue
+            
+            # Skip construct definition
+            if stripped in ('def construct(self):', 'def construct(self) -> None:'):
+                continue
+            
             new_lines.append(line)
         
         # Rejoin the lines
