@@ -65,6 +65,13 @@ The canvas is 14 units wide × 8.9 units tall. ALL content must stay within:
 - Before placing any text, check if another text object is already there
 - If updating text at the bottom, REMOVE the old text first with FadeOut
 - NEVER have two labels, equations, or text strings overlap
+- Labels like "Mid", "Target", "Found" etc. must each be at DIFFERENT y-positions!
+- If you have a label ABOVE an arrow, it must not touch any other text
+
+**VERTICAL SEPARATION FOR LABELS**:
+- If you have multiple annotations (e.g., "Target: 6" and "Mid"), put them at DIFFERENT heights
+- Example: Target at y=2.0, Mid indicator at y=1.5, array at y=0.5
+- ALWAYS check: will this new text overlap with existing text? If yes, move it!
 
 **CORRECT WAY TO UPDATE BOTTOM TEXT**:
 ```python
@@ -94,6 +101,14 @@ MINIMUM FONT SIZES (for readability on mobile - BE GENEROUS):
 - Labels on shapes: font_size=44 minimum
 - Explanatory text: font_size=40 minimum
 - Final equation: font_size=72, color=YELLOW
+
+**COLOR CONSISTENCY** (very important for clarity!):
+- Use CONSISTENT colors for important elements throughout the animation
+- Target/goal: YELLOW (e.g., "Target: 6" and the number 6 in the array both YELLOW)
+- Found/success: GREEN (when item is found, highlight it GREEN)
+- Eliminated/inactive: GRAY or dim (grayed out items that are excluded)
+- Current focus/checking: ORANGE or highlight color
+- Example: If searching for 6, make "Target: 6" yellow AND the box containing 6 yellow too!
 
 THREE ZONES - keep shapes STRICTLY within their zone:
 1️⃣ **TOP ZONE (y > 3.2)**: Title only → `.to_edge(UP, buff=0.4)` 
@@ -157,14 +172,17 @@ self.wait(3)
 STRUCTURE
 ═══════════════════════════════════════════════════════════════
 
-1. HOOK: Question title, then shrink to TOP CENTER (NOT corner!)
+1. HOOK: Title starts at CENTER, then animates UP to top (important!)
 ```python
+# Title MUST start at center of screen (ORIGIN), NOT at top!
 title = Text("Why does 1/2 + 1/4 + ... = 1?", font_size=56)
+# No .to_edge() here - it starts in the middle!
 self.play(Write(title))
 self.wait(1.5)
-# Keep title CENTERED at top - just smaller. Do NOT move to corner!
+# NOW animate it up to the top and make it smaller
 self.play(title.animate.scale(0.7).to_edge(UP, buff=0.3))
 ```
+**WRONG**: `title = Text(...).to_edge(UP)` ← Don't start at top!
 
 2. BUILD: Show visuals step by step with waits
 
