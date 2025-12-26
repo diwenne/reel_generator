@@ -104,8 +104,6 @@ class DynamicScene(Scene):
         
         lines = code.split('\n')
         new_lines = []
-        skip_next_indent_block = False
-        class_indent = None
         
         for line in lines:
             stripped = line.strip()
@@ -113,10 +111,11 @@ class DynamicScene(Scene):
             # Skip import statements
             if stripped.startswith('from manim import') or stripped.startswith('import manim'):
                 continue
+            if stripped.startswith('import numpy') or stripped.startswith('from numpy'):
+                continue
             
             # Skip class definition lines like "class BinarySearchVis(Scene):"
             if re.match(r'^class\s+\w+\s*\(.*Scene.*\)\s*:', stripped):
-                class_indent = len(line) - len(line.lstrip())
                 continue
             
             # Skip construct definition
@@ -125,13 +124,21 @@ class DynamicScene(Scene):
             
             new_lines.append(line)
         
+        # Remove leading blank lines (they can mess up dedent)
+        while new_lines and not new_lines[0].strip():
+            new_lines.pop(0)
+        
+        # Remove trailing blank lines
+        while new_lines and not new_lines[-1].strip():
+            new_lines.pop()
+        
         # Rejoin the lines
         result = '\n'.join(new_lines)
         
         # Use textwrap.dedent which handles common leading whitespace
         result = textwrap.dedent(result)
         
-        # Also strip any leading/trailing blank lines
+        # Final strip
         result = result.strip()
         
         return result

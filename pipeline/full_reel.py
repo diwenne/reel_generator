@@ -34,12 +34,13 @@ def get_video_duration(video_path: Path) -> float:
 def create_full_reel(
     concept: str,
     description: str,
-    youtube_url: str,
+    youtube_url: str = None,
     youtube_start: float = 0,
     length: int = 60,
     output_name: str = None,
     youtube_volume: float = YOUTUBE_VOLUME,
-    youtube_fade_in: float = 1.0
+    youtube_fade_in: float = 1.0,
+    youtube_cache: str = None
 ) -> Path:
     """
     Create a complete reel with math animation on top and YouTube video on bottom.
@@ -47,12 +48,13 @@ def create_full_reel(
     Args:
         concept: The math concept to explain
         description: Detailed description for the LLM
-        youtube_url: YouTube video URL for the background
+        youtube_url: YouTube video URL for the background (optional if youtube_cache provided)
         youtube_start: Start time in seconds for the YouTube clip (default 0)
         length: Target length in seconds (default 60) - used as hint for AI
         output_name: Name for the output (defaults to concept slug)
         youtube_volume: Volume level for YouTube audio (0.0-1.0, default 0.2)
         youtube_fade_in: Duration in seconds for YouTube video/audio fade-in (default 1.0)
+        youtube_cache: Name of a cached YouTube video to use (skips download if provided)
     
     Returns:
         Path to the final combined video
@@ -86,14 +88,32 @@ def create_full_reel(
     actual_duration = get_video_duration(animation_path)
     print(f"Animation duration: {actual_duration:.1f}s")
     
-    # Step 3: Download and crop YouTube video (match animation duration)
-    print(f"\nStep 3/4: Downloading YouTube video ({actual_duration:.1f}s to match animation)...")
-    youtube_cropped = download_and_crop_youtube(
-        url=youtube_url,
-        start_time=youtube_start,
-        duration=actual_duration,  # Use actual animation duration!
-        output_name=output_name
-    )
+    # Step 3: Get YouTube video (from cache or download)
+    if youtube_cache:
+        # Use cached video
+        from video.youtube import YOUTUBE_CACHE_DIR
+        cached_path = YOUTUBE_CACHE_DIR / youtube_cache / "youtube_cropped.mp4"
+        if cached_path.exists():
+            # Check duration of cached video
+            cached_duration = get_video_duration(cached_path)
+            print(f"\nStep 3/4: Using cached YouTube video '{youtube_cache}' ({cached_duration:.1f}s)...")
+            if actual_duration > cached_duration:
+                print(f"  ⚠️  WARNING: Animation ({actual_duration:.1f}s) is LONGER than cache ({cached_duration:.1f}s)!")
+                print(f"      The YouTube video will loop or be cut short.")
+            youtube_cropped = cached_path
+        else:
+            raise RuntimeError(f"Cache not found: {cached_path}")
+    else:
+        # Download fresh
+        if not youtube_url:
+            raise ValueError("Either youtube_url or youtube_cache must be provided")
+        print(f"\nStep 3/4: Downloading YouTube video ({actual_duration:.1f}s to match animation)...")
+        youtube_cropped = download_and_crop_youtube(
+            url=youtube_url,
+            start_time=youtube_start,
+            duration=actual_duration,
+            output_name=output_name
+        )
     
     # Step 4: Stack the videos vertically with reduced YouTube volume
     print(f"\nStep 4/4: Stacking videos (YouTube volume: {youtube_volume*100:.0f}%, fade-in: {youtube_fade_in}s)...")

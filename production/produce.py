@@ -26,12 +26,17 @@ def produce_reel():
     parser = argparse.ArgumentParser(description="Generate production-grade reel with caption")
     parser.add_argument("--concept", "-c", required=True, help="Math concept title")
     parser.add_argument("--description", "-d", required=True, help="Math explanation for animation")
-    parser.add_argument("--url", "-u", required=True, help="YouTube URL for background")
+    parser.add_argument("--url", "-u", help="YouTube URL for background (optional if --cache provided)")
+    parser.add_argument("--cache", help="Use cached YouTube video by name (skips download)")
     parser.add_argument("--start", "-s", type=float, default=0, help="YouTube start time")
     parser.add_argument("--length", "-l", type=int, default=60, help="Target length")
     parser.add_argument("--output", "-o", help="Output name")
     
     args = parser.parse_args()
+    
+    # Validate: need either url or cache
+    if not args.url and not args.cache:
+        parser.error("Either --url or --cache must be provided")
     
     output_name = args.output
     if output_name is None:
@@ -47,6 +52,10 @@ def produce_reel():
     print(f"{'='*60}")
     print(f"PRODUCTION PIPELINE: {args.concept}")
     print(f"Output: {prod_dir}")
+    if args.cache:
+        print(f"YouTube: Using cache '{args.cache}'")
+    else:
+        print(f"YouTube: {args.url} (start={args.start}s)")
     print(f"{'='*60}\n")
     
     # Step 1: Create the video reel (uses internal messy directories)
@@ -58,7 +67,8 @@ def produce_reel():
             youtube_url=args.url,
             youtube_start=args.start,
             length=args.length,
-            output_name=output_name
+            output_name=output_name,
+            youtube_cache=args.cache
         )
     except Exception as e:
         print(f"FAILED to create video: {e}")
@@ -87,15 +97,19 @@ def produce_reel():
     
     try:
         # Get YouTube info for credit
-        print("  Fetching YouTube title...")
-        yt_title = get_youtube_title(args.url)
-        print(f"  YouTube title: {yt_title}")
+        if args.url:
+            print("  Fetching YouTube title...")
+            yt_title = get_youtube_title(args.url)
+            print(f"  YouTube title: {yt_title}")
+        else:
+            yt_title = f"Cached video: {args.cache}"
+            print(f"  Using cached video: {args.cache}")
         
         print("  Generating caption with Gemini...")
         caption = generate_caption(
             concept=args.concept,
             description=args.description,
-            youtube_url=args.url
+            youtube_url=args.url or f"(cached: {args.cache})"
         )
         
         # Parse the caption to extract title, body, and hashtags

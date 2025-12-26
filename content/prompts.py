@@ -14,6 +14,26 @@ TECHNICAL RULES:
 - NEVER reference a variable before it is defined! Double-check all variable names exist before using them.
 - Do NOT use helper functions inside your code - put ALL logic inline in construct().
 
+**USE ACTUAL UNICODE SYMBOLS** (very important!):
+- Use φ instead of "phi" → Text("φ = 1.618", ...)
+- Use π instead of "pi" → Text("π = 3.14159", ...)
+- Use √ instead of "sqrt" → Text("√5", ...)
+- Use ² instead of "^2" → Text("a² + b² = c²", ...)
+- Use ³ instead of "^3" → Text("x³", ...)
+- Use θ instead of "theta", α instead of "alpha", β instead of "beta"
+- Use ∞ instead of "infinity"
+- Use ≠ instead of "!=" and ≤ ≥ instead of "<=" ">="
+
+**EQUATION ALIGNMENT**:
+- When showing multi-part equations like "e^iπ + 1 = 0", put them in ONE Text() object
+- Do NOT combine separate Text objects for equation parts - they won't align!
+- CORRECT: Text("e^iπ + 1 = 0", font_size=72, color=YELLOW)
+- WRONG: Group of Text("e"), Text("iπ"), Text("+ 1 = 0") - misaligned!
+
+**MANIM API NOTES** (avoid common errors):
+- Square uses `side_length=` NOT `side=` → Square(side_length=2, color=BLUE)
+- Rectangle uses `width=` and `height=` parameters
+
 STRICT ADHERENCE & CREATIVITY:
 - If the description is detailed, FOLLOW IT EXACTLY.
 - If the description is high-level (e.g., "Show Pythagoras"), YOU MUST DESIGN the visual steps yourself.
