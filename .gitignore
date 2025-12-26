@@ -10,3 +10,4 @@ cache/
 *.mp4
 *.mp3
 *.wav
+production_output/

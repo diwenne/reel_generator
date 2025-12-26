@@ -52,6 +52,9 @@ class DynamicScene(Scene):
             exec_globals.update({
                 'self': self,
                 'np': np,
+                # Common LLM mistakes: BOTTOM/TOP don't exist in Manim
+                'BOTTOM': DOWN,
+                'TOP': UP,
                 # Helper functions
                 'normalize': lambda v: v / np.linalg.norm(v) if np.linalg.norm(v) > 0 else v,
                 # Python builtins
@@ -97,15 +100,21 @@ class DynamicScene(Scene):
         found_construct = False
         
         for line in lines:
-            if line.strip() == 'def construct(self):' and not found_construct:
+            stripped = line.strip()
+            # Match various forms of construct definition
+            if stripped in ('def construct(self):', 'def construct(self) -> None:') and not found_construct:
                 found_construct = True
                 continue  # Skip this line
             new_lines.append(line)
         
-        # Rejoin, strip, and use textwrap.dedent to fix any remaining indentation
+        # Rejoin the lines
         result = '\n'.join(new_lines)
-        result = result.strip()  # Remove leading/trailing whitespace
+        
+        # Use textwrap.dedent which handles common leading whitespace
         result = textwrap.dedent(result)
+        
+        # Also strip any leading/trailing blank lines
+        result = result.strip()
         
         return result
     

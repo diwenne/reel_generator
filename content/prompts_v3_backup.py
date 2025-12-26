@@ -19,12 +19,8 @@ STRICT ADHERENCE & CREATIVITY:
 🚨🚨🚨 SPACING IS THE #1 PRIORITY - READ THIS CAREFULLY 🚨🚨🚨
 ═══════════════════════════════════════════════════════════════
 
-**ABSOLUTE RULE**: TITLES AND EXPLANATORY TEXT MUST NEVER OVERLAP SHAPES.
-If a title or sentence overlaps a shape, the animation is BROKEN.
-
-WHAT'S ALLOWED vs FORBIDDEN:
-✅ ALLOWED: Shape value labels (like "1/2", "1/4") can be CENTERED INSIDE their shapes - this is intentional labeling
-❌ FORBIDDEN: Titles, questions, or explanatory sentences overlapping with ANY shape
+**ABSOLUTE RULE**: NO TEXT MAY EVER OVERLAP OR TOUCH ANY SHAPE.
+If ANY text overlaps a shape, the animation is COMPLETELY BROKEN AND UNACCEPTABLE.
 
 THREE CRITICAL SPACING REQUIREMENTS:
 
@@ -33,15 +29,16 @@ THREE CRITICAL SPACING REQUIREMENTS:
    - Main content must be shifted DOWN significantly (DOWN * 0.5 or more)
    - There must be VISIBLE BLACK SPACE between title and any shape
 
-2️⃣ **SHAPE VALUE LABELS CAN GO INSIDE SHAPES**
-   - Labels like "1/2", "1/4", "A", "B" can be centered inside their shapes using .move_to(shape.get_center())
-   - This is intentional - it helps identify what each shape represents
-   - Make sure font_size is appropriate for the shape size
+2️⃣ **LABELS MUST BE OUTSIDE SHAPES, NEVER INSIDE OR ON TOP**
+   - NEVER place labels inside or overlapping a shape!
+   - Use .next_to(shape, direction, buff=0.3) to put labels OUTSIDE
+   - For small shapes, put labels BESIDE them, not on them
+   - If a shape is too small for a readable label, put the label outside with an arrow or line
 
 3️⃣ **USE SPACE EFFICIENTLY - MAXIMIZE VISUAL REAL ESTATE**
-   - Shapes should be as LARGE as possible while maintaining proper spacing from title
+   - Shapes should be as LARGE as possible while maintaining proper spacing
    - Don't waste canvas space - use the full 14×8 unit area effectively
-   - Scale shapes to fill available space, but ALWAYS maintain gaps from title/explanatory text
+   - Scale shapes to fill available space, but ALWAYS maintain gaps
 
 ═══════════════════════════════════════════════════════════════
 LAYOUT RULES (MANDATORY - NO EXCEPTIONS)
@@ -49,40 +46,39 @@ LAYOUT RULES (MANDATORY - NO EXCEPTIONS)
 
 **FORBIDDEN**: 
 - Manual coordinates like `UP * 1.5 + RIGHT * 2.1` → causes overlaps
-- Titles or sentences placed at same position as a shape
-- Explanatory text overlapping with shapes
+- Placing Text at same position as a shape
+- Labels centered on shapes (they WILL overlap)
 
 **MANDATORY POSITIONING**:
-- `.move_to(shape.get_center())` for VALUE LABELS inside shapes (this is CORRECT!)
+- `.next_to(target, direction, buff=0.3)` for labels OUTSIDE shapes
 - `.next_to(target, RIGHT/LEFT/UP/DOWN, buff=0)` for perfect tiling of shapes
-- `.to_edge(UP, buff=0.5)` for titles with proper spacing
 - `.arrange(direction, buff=SMALL_BUFF)` for groups
 - `.align_to(target, direction)` for alignment
+- `VGroup(item1, item2)` to group and move things together
 
 LABEL PLACEMENT EXAMPLES:
 ```python
-# ✅ CORRECT: Value label INSIDE the shape (intentional labeling)
-square = Square(side_length=2, fill_opacity=0.7, color=BLUE)
-label = Text("1/4", font_size=36).move_to(square.get_center())  # Centered inside - GOOD!
+# ✅ CORRECT: Label OUTSIDE the shape
+square = Square(side_length=2, fill_opacity=0.7)
+label = Text("1/4", font_size=36).next_to(square, DOWN, buff=0.2)  # Label BELOW
 
-# ✅ CORRECT: Multiple shapes with labels inside each
-left_half = Rectangle(width=2.5, height=5, fill_opacity=0.7, color=BLUE)
-right_half = Rectangle(width=2.5, height=5, fill_opacity=0.5, color=GREEN).next_to(left_half, RIGHT, buff=0)
-label_left = Text("1/2", font_size=48).move_to(left_half.get_center())  # Inside left shape
-label_right = Text("1/2", font_size=48).move_to(right_half.get_center())  # Inside right shape
+# ✅ CORRECT: For tiled shapes, labels go outside the group
+left_half = Rectangle(width=2, height=4, fill_opacity=0.7)
+right_half = Rectangle(width=2, height=4, fill_opacity=0.5).next_to(left_half, RIGHT, buff=0)
+label_left = Text("1/2", font_size=40).next_to(left_half, LEFT, buff=0.3)  # Outside left
+label_right = Text("1/2", font_size=40).next_to(right_half, RIGHT, buff=0.3)  # Outside right
 
-# ❌ WRONG: TITLE overlapping with shape
-title = Text("How does this work?", font_size=48).move_to(ORIGIN)
-square = Square(side_length=4).move_to(ORIGIN)  # BROKEN - title overlaps shape!
+# ❌ WRONG: Label ON TOP of shape (WILL OVERLAP!)
+square = Square(side_length=2)
+label = Text("1/4").move_to(square.get_center())  # BROKEN - overlaps!
 ```
 
 TITLE AND CONTENT SPACING:
 ```python
 # ✅ CORRECT: Title with LARGE gap, content shifted down
-title = Text("How does 1/2 + 1/4 + ... = 1?", font_size=48).to_edge(UP, buff=0.5)
-main_shape = Square(side_length=4).move_to(ORIGIN).shift(DOWN * 0.3)  # Shifted DOWN!
-shape_label = Text("1", font_size=48).move_to(main_shape.get_center())  # Label inside - OK!
-# Result: visible gap between title and shape, label correctly inside
+title = Text("Question?", font_size=48).to_edge(UP, buff=0.5)
+main_shape = Square(side_length=4).move_to(ORIGIN).shift(DOWN * 0.5)  # Shifted DOWN!
+# Result: visible gap between title and shape
 
 # ❌ WRONG: Shape too close to title
 title = Text("Question?", font_size=48).to_edge(UP, buff=0.3)

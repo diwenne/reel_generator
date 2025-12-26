@@ -100,9 +100,70 @@ python -m pipeline.full_reel \
 
 **Output**: `final_reels/infinite_sum_reel/final.mp4`
 
+**Output**: `final_reels/infinite_sum_reel/final.mp4`
+
 ---
 
-## 🛠 Individual Commands (CLI)
+## 🏭 Production Pipeline (Recommended)
+
+For a streamlined "done-for-you" experience that generates the reel, caption, hashtags, and metadata in one go:
+
+```bash
+python -m production.produce \
+  --concept "Concept Name" \
+  --description "Detailed description..." \
+  --url "https://youtube.com/..." \
+  --start 0 \
+  --output "folder_name"
+```
+
+**What this does:**
+
+1. Generates and renders the Manim animation
+2. Downloads and crops the YouTube background
+3. Stacks them into a final reel
+4. **Generates a viral-ready caption** (Title, History, Hashtags) using the background video context
+5. Saves everything neatly to `production_output/<folder_name>/`
+
+**Output Files:**
+
+- `reel.mp4`: Final video
+- `caption.txt`: Full caption with history/credits
+- `hashtags.txt`: Optimized hashtags
+- `metadata.json`: Source info
+
+---
+
+## ✍️ Writing Effective Descriptions
+
+**CRITICAL: The accuracy of the animation depends 100% on the length and detail of your description.**
+
+The AI simply converts your words into code. If you are vague, the animation will be generic and wrong. If you are specific, it will be perfect.
+
+**Rule of Thumb:** Your description should be **at least 3-4 sentences long** and describe the _visuals_, not just the math.
+
+### ❌ Bad Description (Too Short)
+
+> "Show the Pythagorean theorem."
+> _(Result: The AI will guess, usually resulting in a generic, boring static slide.)_
+
+### ✅ Good Description (Detailed & Visual)
+
+> "Visually prove the Pythagorean theorem using the 'Rearrangement Proof'.
+>
+> 1. Start with a large square with side length (a+b). Show four right triangles with sides a, b, c arranged in the corners, leaving a tilted inner square of size c^2. Label sides a, b, c.
+> 2. Pause to let the viewer see the area is c^2.
+> 3. Then, animate the four triangles SLIDING (do not fade) to new positions: push two to the top-left and two to the bottom-right.
+> 4. This reveals two new empty squares in the remaining space: one small square of size a^2 and one medium square of size b^2.
+> 5. Use braces to clearly label the new areas a^2 and b^2.
+> 6. Conclude by morphing the text 'c^2' into 'a^2 + b^2' to prove the theorem."
+
+**Key Requirements:**
+
+1.  **Step-by-Step**: Number your steps or use words like "First," "Then," "Next."
+2.  **Describe Movement**: Use "slide," "rotate," "shift," "morph."
+3.  **Specify Labels**: Tell it exactly what text to show (e.g., "Label the hypotenuse 'c'").
+4.  **No Ambiguity**: Don't match _concepts_; match _actions_.
 
 The CLI supports individual steps if you want more control:
 
@@ -305,3 +366,11 @@ MIT License - Feel free to use and modify!
 - [3Blue1Brown](https://www.3blue1brown.com/) - Inspiration for animation style
 - [OpenAI](https://openai.com/) - TTS voice synthesis
 - [Google Gemini](https://ai.google.dev/) - Content generation
+
+Another example
+python -m production.produce \
+ --concept "Infinite Sum Equals One" \
+ --description "Visually prove that 1/2 + 1/4 + 1/8 + ... = 1. Start with a unit square. Fill half (left). Then fill half of the remaining right side (top right). Then fill half of the remaining bottom right (bottom right). Continue this spiral pattern to show it fills the square. Use .next_to and .align_to exclusively." \
+ --url "https://www.youtube.com/watch?v=J90L73YOR3k" \
+ --start 0 \
+ --output "infinite_sum_v3_fixed"

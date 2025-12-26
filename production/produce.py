@@ -1,23 +1,26 @@
+"""Production pipeline: Generate Reel + Caption + Metadata.
 
-"""Production pipeline: Generate Reel + Caption + Metadata."""
+Clean production output - only final deliverables in production_output/.
+"""
 
 import argparse
+import shutil
 import sys
 from pathlib import Path
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from pipeline.full_reel import create_full_reel
-from production.metadata import generate_caption
-import content.generator
-import production.metadata
+# MUST patch config BEFORE importing modules that use it
 import config
 
-# Override model in all modules that use it
-config.LLM_MODEL = "gemini-1.5-pro"
-content.generator.LLM_MODEL = "gemini-1.5-pro"
-production.metadata.LLM_MODEL = "gemini-1.5-pro"
+# Now import modules that depend on config
+from pipeline.full_reel import create_full_reel
+from production.metadata import generate_caption, get_youtube_title
+
+# Clean production output directory
+PRODUCTION_OUTPUT = Path(__file__).parent.parent / "production_output"
+
 
 def produce_reel():
     parser = argparse.ArgumentParser(description="Generate production-grade reel with caption")
@@ -25,7 +28,7 @@ def produce_reel():
     parser.add_argument("--description", "-d", required=True, help="Math explanation for animation")
     parser.add_argument("--url", "-u", required=True, help="YouTube URL for background")
     parser.add_argument("--start", "-s", type=float, default=0, help="YouTube start time")
-    parser.add_argument("--length", "-l", type=int, default=60, help="Target legnth")
+    parser.add_argument("--length", "-l", type=int, default=60, help="Target length")
     parser.add_argument("--output", "-o", help="Output name")
     
     args = parser.parse_args()
@@ -33,12 +36,18 @@ def produce_reel():
     output_name = args.output
     if output_name is None:
         output_name = args.concept.lower().replace(" ", "_")
-        
-    print(f"=== PRODUCTION PIPELINE: {args.concept} ===")
     
-    # Step 1: Create the video reel
-    # We will use the 60fps fix we implemented in the renderer earlier
-    # (Assuming renderer.py is still patched to 60fps)
+    # Setup clean production output directory
+    prod_dir = PRODUCTION_OUTPUT / output_name
+    prod_dir.mkdir(parents=True, exist_ok=True)
+        
+    print(f"{'='*60}")
+    print(f"PRODUCTION PIPELINE: {args.concept}")
+    print(f"Output: {prod_dir}")
+    print(f"{'='*60}\n")
+    
+    # Step 1: Create the video reel (uses internal messy directories)
+    print("Step 1/3: Creating video reel...")
     try:
         final_video_path = create_full_reel(
             concept=args.concept,
@@ -50,31 +59,159 @@ def produce_reel():
         )
     except Exception as e:
         print(f"FAILED to create video: {e}")
-        return
-
-    # Step 2: Generate Caption/Metadata
-    print("\n=== GENERATING VIDEO METADATA ===")
+        import traceback
+        traceback.print_exc()
+        return None
+    
+    # Step 2: Copy final video to clean production directory
+    print("\nStep 2/3: Copying to production output...")
+    prod_video = prod_dir / "reel.mp4"
+    shutil.copy(final_video_path, prod_video)
+    print(f"  Video: {prod_video}")
+    
+    # Step 3: Generate Caption/Metadata with YouTube credit
+    print("\nStep 3/3: Generating caption & metadata...")
+    import json
+    
+    deliverables = {}  # Track all output files
+    
     try:
+        # Get YouTube info for credit
+        print("  Fetching YouTube title...")
+        yt_title = get_youtube_title(args.url)
+        print(f"  YouTube title: {yt_title}")
+        
+        print("  Generating caption with Gemini...")
         caption = generate_caption(
             concept=args.concept,
             description=args.description,
             youtube_url=args.url
         )
         
-        # Save caption
-        output_dir = final_video_path.parent
-        caption_path = output_dir / "caption.txt"
-        caption_path.write_text(caption)
+        # Parse the caption to extract title, body, and hashtags
+        lines = caption.strip().split('\n')
         
-        print("\n" + "="*40)
-        print("CAPTION GENERATED:")
-        print("="*40)
-        print(caption)
-        print("="*40)
-        print(f"Saved to: {caption_path}")
+        # Extract title (first non-empty line)
+        title_line = ""
+        body_lines = []
+        hashtags = []
+        
+        in_hashtags = False
+        for line in lines:
+            stripped = line.strip()
+            if not stripped:
+                if title_line and not in_hashtags:
+                    body_lines.append("")  # Preserve paragraph breaks
+                continue
+            
+            # Check if this line contains hashtags
+            if '#' in stripped and stripped.count('#') >= 3:
+                in_hashtags = True
+                # Extract all hashtags from this line
+                words = stripped.split()
+                for word in words:
+                    if word.startswith('#'):
+                        hashtags.append(word)
+            elif in_hashtags and stripped.startswith('#'):
+                # Additional hashtag lines
+                words = stripped.split()
+                for word in words:
+                    if word.startswith('#'):
+                        hashtags.append(word)
+            elif not title_line:
+                title_line = stripped
+            else:
+                body_lines.append(stripped)
+        
+        # Clean up body (remove trailing empty lines)
+        while body_lines and not body_lines[-1]:
+            body_lines.pop()
+        
+        description_text = '\n'.join(body_lines)
+        hashtags_text = ' '.join(hashtags)
+        
+        # YouTube credit line
+        credit_line = f"\n\n🎥 Gameplay: {yt_title}\n🔗 {args.url}"
+        
+        # Full caption with everything
+        full_caption = f"{title_line}\n\n{description_text}{credit_line}\n\n{hashtags_text}"
+        
+        # Save individual files for easy copy-paste
+        
+        # 1. Title only
+        title_path = prod_dir / "title.txt"
+        title_path.write_text(title_line)
+        deliverables["title"] = title_path
+        print(f"  ✓ title.txt - Reel title")
+        
+        # 2. Description/body (without hashtags)
+        desc_path = prod_dir / "description.txt"
+        desc_path.write_text(description_text + credit_line)
+        deliverables["description"] = desc_path
+        print(f"  ✓ description.txt - Caption body with credit")
+        
+        # 3. Hashtags only
+        hashtags_path = prod_dir / "hashtags.txt"
+        hashtags_path.write_text(hashtags_text)
+        deliverables["hashtags"] = hashtags_path
+        print(f"  ✓ hashtags.txt - All hashtags ({len(hashtags)} tags)")
+        
+        # 4. Full combined caption
+        caption_path = prod_dir / "caption.txt"
+        caption_path.write_text(full_caption)
+        deliverables["caption"] = caption_path
+        print(f"  ✓ caption.txt - Full combined caption")
+        
+        # 5. Metadata JSON
+        metadata = {
+            "concept": args.concept,
+            "description": args.description,
+            "youtube_url": args.url,
+            "youtube_title": yt_title,
+            "youtube_start": args.start,
+            "output_name": output_name,
+            "title": title_line,
+            "hashtag_count": len(hashtags)
+        }
+        metadata_path = prod_dir / "metadata.json"
+        metadata_path.write_text(json.dumps(metadata, indent=2))
+        deliverables["metadata"] = metadata_path
+        print(f"  ✓ metadata.json - Reel metadata")
         
     except Exception as e:
         print(f"FAILED to generate metadata: {e}")
+        import traceback
+        traceback.print_exc()
+        full_caption = None
+
+    # Final summary
+    print(f"\n{'='*60}")
+    print("🎉 PRODUCTION COMPLETE!")
+    print(f"{'='*60}")
+    print(f"\n📁 Output directory: {prod_dir}")
+    print(f"\n📦 DELIVERABLES:")
+    print(f"   📹 reel.mp4         - Final video ready to post")
+    print(f"   📝 title.txt        - Reel title")
+    print(f"   📄 description.txt  - Caption body with YT credit")
+    print(f"   #️⃣  hashtags.txt     - All hashtags")
+    print(f"   📋 caption.txt      - Full combined caption")
+    print(f"   📊 metadata.json    - Reel metadata")
+    
+    if deliverables.get("title"):
+        print(f"\n{'='*60}")
+        print("📌 TITLE:")
+        print(f"{'='*60}")
+        print(title_line)
+    
+    if full_caption:
+        print(f"\n{'='*60}")
+        print("📝 FULL CAPTION PREVIEW:")
+        print(f"{'='*60}")
+        preview = full_caption[:600] + "..." if len(full_caption) > 600 else full_caption
+        print(preview)
+    
+    return prod_dir
+
 
 if __name__ == "__main__":
     produce_reel()
