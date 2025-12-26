@@ -3,14 +3,14 @@
 import subprocess
 import time
 from pathlib import Path
-from config import PROJECT_ROOT, REEL_WIDTH, HALF_HEIGHT
+from config import PROJECT_ROOT, REEL_WIDTH, YOUTUBE_HEIGHT
 
 # Dedicated directory for YouTube downloads
 YOUTUBE_CACHE_DIR = PROJECT_ROOT / "youtube_cache"
 YOUTUBE_CACHE_DIR.mkdir(exist_ok=True)
 
 # Timeout settings (in seconds)
-DOWNLOAD_TIMEOUT = 180  # 3 minutes for yt-dlp download
+DOWNLOAD_TIMEOUT = 400  # 3 minutes for yt-dlp download
 CROP_TIMEOUT = 120  # 2 minutes for ffmpeg crop
 
 
@@ -122,12 +122,12 @@ def download_and_crop_youtube(
     
     # Step 2: Crop the video to 1080x960 (center crop)
     _log(f"STEP 2/2: Cropping video to fit reel...")
-    _log(f"  Target: {REEL_WIDTH}x{HALF_HEIGHT}")
+    _log(f"  Target: {REEL_WIDTH}x{YOUTUBE_HEIGHT}")
     
     crop_cmd = [
         "ffmpeg",
         "-i", str(raw_video),
-        "-vf", f"scale=-1:{HALF_HEIGHT},crop={REEL_WIDTH}:{HALF_HEIGHT}",
+        "-vf", f"scale=-1:{YOUTUBE_HEIGHT},crop={REEL_WIDTH}:{YOUTUBE_HEIGHT}",
         "-c:a", "copy",
         "-y",  # Overwrite
         str(cropped_video)

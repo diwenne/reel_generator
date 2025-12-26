@@ -5,10 +5,10 @@ import re
 from pathlib import Path
 from manim import *
 
-# Configure for 1080x760 animation area (200px safe zone added during compositing)
-# Total top half is 960px, but we render 760px and add 200px black bar later
+# Configure for animation area (SAFE_ZONE added during compositing)
+from config import ANIMATION_HEIGHT
 config.pixel_width = 1080
-config.pixel_height = 760
+config.pixel_height = ANIMATION_HEIGHT
 config.frame_rate = 60
 config.background_color = BLACK
 

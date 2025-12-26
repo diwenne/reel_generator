@@ -3,7 +3,7 @@
 import subprocess
 from pathlib import Path
 
-from config import PROJECT_ROOT, REEL_WIDTH, REEL_HEIGHT, HALF_HEIGHT
+from config import PROJECT_ROOT, REEL_WIDTH, REEL_HEIGHT, YOUTUBE_HEIGHT, ANIMATION_HEIGHT, SAFE_ZONE_HEIGHT, BOTTOM_BUFFER_HEIGHT
 from content.generator import generate_content
 from rendering.renderer import render_from_plan
 from video.youtube import download_and_crop_youtube
@@ -97,12 +97,17 @@ def create_full_reel(
     print(f"\nStep 4/4: Stacking videos (YouTube volume: {youtube_volume*100:.0f}%)...")
     final_path = reel_dir / "final.mp4"
     
-    # Filter: add black safe zone bar on top of animation (760px -> 960px), 
-    # scale YouTube, trim to exact duration, stack vertically, reduce YouTube audio volume
-    # The 200px black bar provides safe zone for Instagram "Friends" overlay
+    # Filter: add black safe zone bar on top and bottom buffer below animation.
+    # Layout: Safe Zone (100px) + Animation (960px) + Bottom Buffer (60px) + YouTube (800px) = 1920px
+    # Since Manim renders at ANIMATION_HEIGHT (960px), we pad:
+    #   - Top: SAFE_ZONE_HEIGHT (100px) black bar
+    #   - Bottom: BOTTOM_BUFFER_HEIGHT (60px) black bar
+    # Then stack YouTube video (YOUTUBE_HEIGHT) below.
+    top_section_height = SAFE_ZONE_HEIGHT + ANIMATION_HEIGHT + BOTTOM_BUFFER_HEIGHT
     filter_complex = (
-        f"[0:v]scale={REEL_WIDTH}:760,pad={REEL_WIDTH}:{HALF_HEIGHT}:0:200:black[top];"
-        f"[1:v]trim=duration={actual_duration},setpts=PTS-STARTPTS,scale={REEL_WIDTH}:{HALF_HEIGHT}[bottom];"
+        f"[0:v]pad={REEL_WIDTH}:{top_section_height}:0:{SAFE_ZONE_HEIGHT}:black[padded];"
+        f"[padded]pad={REEL_WIDTH}:{top_section_height}:0:0:black[top];"
+        f"[1:v]trim=duration={actual_duration},setpts=PTS-STARTPTS,scale={REEL_WIDTH}:{YOUTUBE_HEIGHT}[bottom];"
         f"[top][bottom]vstack=inputs=2[v];"
         f"[1:a]atrim=duration={actual_duration},asetpts=PTS-STARTPTS,volume={youtube_volume}[a]"
     )

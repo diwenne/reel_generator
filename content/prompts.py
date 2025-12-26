@@ -19,158 +19,157 @@ STRICT ADHERENCE & CREATIVITY:
 - DO NOT just flash text. animate objects, transform shapes, and build intuition.
 
 ═══════════════════════════════════════════════════════════════
-TEXT POSITIONING, SIZING & SPACE EFFICIENCY (CRITICAL)
+🚨🚨🚨 CRITICAL: SCREEN BOUNDARIES & TEXT LIMITS 🚨🚨🚨
 ═══════════════════════════════════════════════════════════════
 
-**USE THE FULL CANVAS** - Don't leave empty black space!
-- The canvas is approximately 14 units wide × 8 units tall
-- Main visuals should be LARGE: use width/height of 4-6 units, NOT tiny 2-unit shapes
-- Fill at least 60-70% of the available space with your visualization
-- Small centered shapes with lots of black space = BAD
+**NOTHING CAN GO OFF SCREEN. EVER.**
 
-MINIMUM FONT SIZES (for readability on mobile):
-- Titles: font_size=48 or larger (NOT 36 or 40!)
-- Labels on shapes: font_size=40 minimum (NEVER smaller than 36)
-- Explanatory text: font_size=36 minimum
-- Small labels (like fractions): font_size=36 minimum
+The canvas is 14 units wide × 8.9 units tall. ALL content must stay within:
+- X: -6.5 to +6.5 (with 0.5 unit margin = usable: -6 to +6)
+- Y: -4.2 to +4.2 (with 0.3 unit margin = usable: -3.9 to +3.9)
+
+**TEXT LENGTH LIMITS** (CRITICAL - text going off-screen = BROKEN):
+- Maximum 35 characters for any single line of text
+- If showing a running sum like "1/2 + 1/4 + 1/8 + ...", use SHORT form: "Sum → 1"
+- NEVER show long equations like "Sum = 1/2 + 1/4 + 1/8 + 1/16 + 1/32 + ..."
+- If you need to show accumulating values, use a SIMPLE counter: "Sum: 0.875" not the full expression
+
+**FORBIDDEN PATTERNS**:
+❌ `Text("Sum = 1/2 + 1/4 + 1/8 + 1/16 + ...")` - TOO LONG, goes off screen
+❌ Equations that grow by concatenating terms
+❌ Any text updated in a loop that gets longer each iteration
+
+**CORRECT PATTERNS**:
+✅ `Text("Sum: 0.9375", font_size=40)` - short numeric display
+✅ `Text("Approaching 1", font_size=40)` - short descriptive text
+✅ Show the VALUE changing, not the full expression
 
 ═══════════════════════════════════════════════════════════════
-🚨🚨🚨 SPACING IS CRITICAL - TEXT MUST NOT TOUCH SHAPES 🚨🚨🚨
+🚨🚨🚨 CRITICAL: NO OVERLAPPING TEXT 🚨🚨🚨
 ═══════════════════════════════════════════════════════════════
 
-ABSOLUTE RULES:
-✅ ALLOWED: Shape VALUE LABELS (like "1/2", "1/4") CENTERED INSIDE their shapes
-❌ FORBIDDEN: Any title, equation, or text TOUCHING or within 0.5 units of any shape edge
+**TWO TEXT OBJECTS MUST NEVER OCCUPY THE SAME SPACE**
 
-**SPACING REQUIREMENTS** (non-negotiable):
-- There must be VISIBLE BLACK SPACE (at least 0.5 units) between title and shapes
-- There must be VISIBLE BLACK SPACE (at least 0.5 units) between shapes and bottom text
-- If text appears to touch a shape, THE ANIMATION IS BROKEN
+- Before placing any text, check if another text object is already there
+- If updating text at the bottom, REMOVE the old text first with FadeOut
+- NEVER have two labels, equations, or text strings overlap
 
-THREE ZONES - keep shapes AWAY from zone boundaries:
-1️⃣ **TOP ZONE (y > 3.0)**: Title only → `.to_edge(UP, buff=0.3)` 
-2️⃣ **CENTER ZONE (-2.0 < y < 2.5)**: Main visuals - keep shapes in this zone!
-3️⃣ **BOTTOM ZONE (y < -2.5)**: Equations, sums → `.to_edge(DOWN, buff=0.3)`
+**CORRECT WAY TO UPDATE BOTTOM TEXT**:
+```python
+# Show first equation
+sum_text = Text("Sum: 0.5", font_size=40).to_edge(DOWN, buff=0.4)
+self.play(Write(sum_text))
+
+# Update it - REPLACE, don't add on top!
+new_sum = Text("Sum: 0.75", font_size=40).to_edge(DOWN, buff=0.4)
+self.play(Transform(sum_text, new_sum))  # Morphs old into new
+```
+
+**WRONG** (creates overlap):
+```python
+sum_text = Text("Sum: 0.5").to_edge(DOWN)
+self.play(Write(sum_text))
+new_text = Text("Approaches 1").to_edge(DOWN)  # OVERLAPS with sum_text!
+self.play(Write(new_text))  # ❌ Now two texts in same spot!
+```
+
+═══════════════════════════════════════════════════════════════
+TEXT POSITIONING, SIZING & SPACE EFFICIENCY
+═══════════════════════════════════════════════════════════════
+
+MINIMUM FONT SIZES (for readability on mobile - BE GENEROUS):
+- Titles/Questions: font_size=56 or larger (NOT 48 or smaller!)
+- Labels on shapes: font_size=44 minimum
+- Explanatory text: font_size=40 minimum
+- Final equation: font_size=72, color=YELLOW
+
+THREE ZONES - keep shapes STRICTLY within their zone:
+1️⃣ **TOP ZONE (y > 3.2)**: Title only → `.to_edge(UP, buff=0.4)` 
+2️⃣ **CENTER ZONE (-2.2 < y < 2.8)**: Main visuals - keep ALL shapes here!
+3️⃣ **BOTTOM ZONE (y < -2.7)**: Equations, sums → `.to_edge(DOWN, buff=0.4)`
 
 **SHAPE SIZING FOR PROPER GAPS**:
-- Maximum shape height: 4.0 units (NOT 5 or larger!)
-- Position main shapes at: `.move_to(UP * 0.3)` to center them between title and bottom text
-- This leaves ~1 unit gap from title and ~1 unit gap from bottom text
-
-POSITIONING RULES:
-- Titles: `.to_edge(UP, buff=0.3)` - sits at y ≈ 3.5
-- Main shapes: `.move_to(UP * 0.3)` or `.move_to(ORIGIN)` - center them in the safe zone
-- Bottom text: `.to_edge(DOWN, buff=0.3)` - sits at y ≈ -3.5
-- Value labels: `.move_to(shape.get_center())` - INSIDE shapes is correct!
-
-EXAMPLES:
-```python
-# ✅ CORRECT: Proper spacing with gaps
-title = Text("Why does 1/2 + 1/4 + ... = 1?", font_size=48).to_edge(UP, buff=0.3)
-main_square = Square(side_length=4).move_to(UP * 0.3)  # Centered with room for title above and text below
-value_label = Text("1", font_size=48).move_to(main_square.get_center())
-sum_equation = Text("Sum = 1/2 + 1/4", font_size=40).to_edge(DOWN, buff=0.3)
-# Result: ~1 unit gap above shape, ~1 unit gap below shape ✓
-
-# ❌ WRONG: Shape too big, touches title and bottom text
-main_square = Square(side_length=5.5).move_to(ORIGIN)  # Too big! Will touch title and bottom text
-```
-
-SCALING EXAMPLES:
-```python
-# GOOD: Large shape that uses space well
-square = Square(side_length=5, color=BLUE)  # 5 units - fills space nicely
-
-# BAD: Tiny shape with wasted space
-square = Square(side_length=2, color=BLUE)  # 2 units - way too small!
-
-# GOOD: Big readable title
-title = Text("Why does this equal 1?", font_size=52).to_edge(UP, buff=0.5)
-
-# BAD: Tiny title lost in space
-title = Text("Why does this equal 1?", font_size=36).to_edge(UP)  # TOO SMALL
-```
+- Maximum shape height: 4.0 units
+- Position main shapes at: `.move_to(UP * 0.3)` to center them
+- There must be VISIBLE BLACK SPACE between zones
 
 ═══════════════════════════════════════════════════════════════
-DRAWING ANGLES (CRITICAL - follow exactly)
+🚨🚨🚨 FINAL CONCLUSION: EVERYTHING MORPHS INTO ONE STATEMENT 🚨🚨🚨
+═══════════════════════════════════════════════════════════════
+
+**THE ANIMATION MUST END WITH EXACTLY ONE ELEMENT ON SCREEN**
+
+At the conclusion:
+1. Create the final statement: `final = Text("Sum = 1", font_size=72, color=YELLOW).move_to(ORIGIN)`
+2. Group ALL visible objects: `all_objects = VGroup(title, shapes, labels, equations, ...)`
+3. Morph everything into the final: `self.play(ReplacementTransform(all_objects, final))`
+4. Hold: `self.wait(3)`
+
+**COMPLETE ENDING PATTERN**:
+```python
+# Create the final centered statement
+final_equation = Text("1/2 + 1/4 + ... = 1", font_size=72, color=YELLOW).move_to(ORIGIN)
+
+# Gather EVERYTHING currently on screen
+all_visible = VGroup(title, main_square, all_labels, bottom_text)  # Include ALL objects!
+
+# Morph all objects INTO the final statement
+self.play(ReplacementTransform(all_visible, final_equation), run_time=1.5)
+
+# Hold on the final result
+self.wait(3)
+```
+
+**REQUIREMENTS FOR FINAL FRAME**:
+✅ ONLY the final equation visible
+✅ Final equation CENTERED at ORIGIN (not to_edge!)
+✅ font_size=72 or larger, color=YELLOW
+✅ ALL other elements (title, shapes, labels) have morphed INTO this
+✅ Nothing else on screen - just black background + final equation
+
+**WRONG ENDINGS**:
+❌ Final equation off to the side (not centered)
+❌ Title still visible at top
+❌ Shapes still visible
+❌ Multiple text elements remaining
+❌ Using FadeOut on objects instead of morphing them into final
+
+═══════════════════════════════════════════════════════════════
+STRUCTURE
+═══════════════════════════════════════════════════════════════
+
+1. HOOK: Question title, then shrink to corner
+```python
+title = Text("Why does 1/2 + 1/4 + ... = 1?", font_size=56)
+self.play(Write(title))
+self.wait(1.5)
+self.play(title.animate.scale(0.85).to_edge(UP, buff=0.3))
+```
+
+2. BUILD: Show visuals step by step with waits
+
+3. REVEAL: The "aha" moment
+
+4. CONCLUDE: **MORPH EVERYTHING INTO FINAL EQUATION**
+
+═══════════════════════════════════════════════════════════════
+DRAWING ANGLES (for geometry animations)
 ═══════════════════════════════════════════════════════════════
 
 For angles at triangle vertices, use Angle() from manim:
 ```python
 from manim import Angle
 
-# Triangle vertices
 A = np.array([-2, -1, 0])
 B = np.array([2, -1, 0])  
 C = np.array([0, 1.5, 0])
 
-# Create triangle
 triangle = Polygon(A, B, C, color=BLUE)
 
-# Create angles - Angle() handles the math for you
-# Angle(line1, line2) where lines meet at the vertex
 line_AB = Line(A, B)
 line_AC = Line(A, C)
-line_BA = Line(B, A)
-line_BC = Line(B, C)
-line_CA = Line(C, A)
-line_CB = Line(C, B)
-
-# Angle at A (between AB and AC)
 angle_a = Angle(line_AB, line_AC, radius=0.4, color=YELLOW)
-label_a = Text("a", font_size=24, color=YELLOW)
-label_a.move_to(angle_a.point_from_proportion(0.5) + (A - angle_a.point_from_proportion(0.5)) * -0.5)
-
-# Angle at B (between BA and BC)  
-angle_b = Angle(line_BA, line_BC, radius=0.4, color=GREEN)
-label_b = Text("b", font_size=24, color=GREEN)
-label_b.move_to(angle_b.point_from_proportion(0.5) + (B - angle_b.point_from_proportion(0.5)) * -0.5)
-
-# Angle at C (between CA and CB)
-angle_c = Angle(line_CA, line_CB, radius=0.4, color=RED)
-label_c = Text("c", font_size=24, color=RED)
-label_c.move_to(angle_c.point_from_proportion(0.5) + (C - angle_c.point_from_proportion(0.5)) * -0.5)
 ```
-
-CRITICAL: Labels go OUTSIDE the angle arc, not inside. Push them away from the vertex.
-
-═══════════════════════════════════════════════════════════════
-STRUCTURE
-═══════════════════════════════════════════════════════════════
-
-1. HOOK: Question title, then shrink to top
-```python
-title = Text("Why do triangle angles sum to 180°?", font_size=44)
-self.play(Write(title))
-self.wait(1.5)
-self.play(title.animate.scale(0.5).to_edge(UP))
-```
-
-2. BUILD: Show visuals step by step with waits between
-
-3. REVEAL: The "aha" moment
-
-4. CONCLUDE: **DRAMATIC FINALE** - This is the most important part!
-```python
-# Clear EVERYTHING from screen first
-self.play(
-    FadeOut(shape), FadeOut(labels), FadeOut(title),
-    run_time=0.5
-)
-
-# Show BIG, centered final equation - this is the payoff!
-final = Text("1/2 + 1/4 + 1/8 + ... = 1", font_size=64, color=YELLOW)
-final.move_to(ORIGIN)  # Dead center of screen
-self.play(Write(final), run_time=1.5)
-self.wait(3)  # Let it sink in!
-```
-
-**FINALE REQUIREMENTS**:
-- FadeOut ALL visuals before showing final equation
-- Final equation should be font_size=60-72 (HUGE)
-- Position at ORIGIN (center of screen)
-- Use a highlight color like YELLOW or GREEN
-- Hold for 3+ seconds at the end
 
 ═══════════════════════════════════════════════════════════════
 PACING
