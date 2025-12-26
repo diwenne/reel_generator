@@ -1,0 +1,10 @@
+{
+  "concept": "Gabriel's Horn",
+  "description": "Gabriel's Horn paradox (finite volume, infinite surface area). Intro title: 'Infinite Surface, Finite Volume?' at the TOP center. Use Text() ONLY\u2014absolutely NO Tex or MathTex. EVERYTHING must stay horizontally centered (x=0) at all times. Step 1 (Function): In the exact CENTER, show 'y =' then a manually-built fraction for '1/x' using VGroup: Text('1') above, a horizontal Line as the bar, Text('x') below; keep the whole equation centered. Step 2 (Curve): Transition to a smooth 1/x curve starting at x=1 and extending infinitely to the right; keep the curve visually CENTERED (do not let it drift right). Step 3 (Horn): Reveal a horn/trumpet solid formed by rotating the curve around the x-axis; show the horn under the curve, narrowing forever as it extends right. Step 4 (Volume calculus): Center a short calculus explanation using ONLY Text(): 'Volume by disks: \u03c0 \u222b[1\u2192\u221e] (1/x)^2 dx' then below it 'Integral converges to 1', then 'Volume = \u03c0 \u00d7 1 = \u03c0' in GREEN. Step 5 (Surface area calculus): Directly below, show a Text-only explanation: 'Surface area: 2\u03c0 \u222b[1\u2192\u221e] (1/x) \u221a(1 + 1/x^4) dx' then below it 'Integral diverges', then 'Surface Area = \u221e' in RED. Step 6 (Interpretation): Center a single clean statement: 'Finite volume does not require finite surface area.' Final: Clear to a conclusion screen\u2014BLUE title 'Gabriel's Horn' centered, and YELLOW text beneath: 'V = \u03c0,  Surface Area = \u221e'. Add clear pauses between steps; clean minimal style; educational pacing; absolutely no Tex or MathTex.",
+  "youtube_url": null,
+  "youtube_title": "Cached video: gabriels_horn_shared",
+  "youtube_start": 0,
+  "output_name": "gabriels_horn_centered_2",
+  "title": "Mastering the Geometry Dash Course",
+  "hashtag_count": 19
+}

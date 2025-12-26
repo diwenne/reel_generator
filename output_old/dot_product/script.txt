@@ -1,7 +1,0 @@
-Dot Product.
-
-Core idea: It measures alignment of two vectors. Compute it two ways: a dot b equals the product of their lengths times cos theta, or ax bx plus ay by. It’s positive when they point the same way, zero when perpendicular, negative when opposite.
-
-Example: Let a be (3,1) and b be (2,2). Then a dot b equals 3 times 2 plus 1 times 2, which is 8. Magnitudes are sqrt(10) and sqrt(8), so cos theta is 8 over sqrt(10) times sqrt(8).
-
-Takeaway: Dot product is how much a goes in b’s direction.

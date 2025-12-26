@@ -367,19 +367,18 @@ MIT License - Feel free to use and modify!
 - [OpenAI](https://openai.com/) - TTS voice synthesis
 - [Google Gemini](https://ai.google.dev/) - Content generation
 
-Another example
-python -m production.produce \
- --concept "Infinite Sum Equals One" \
- --description "Visually prove that 1/2 + 1/4 + 1/8 + ... = 1. Start with a unit square. Fill half (left). Then fill half of the remaining right side (top right). Then fill half of the remaining bottom right (bottom right). Continue this spiral pattern to show it fills the square. Use .next_to and .align_to exclusively." \
- --url "https://www.youtube.com/watch?v=J90L73YOR3k" \
- --start 0 \
- --output "infinite_sum_v3_fixed"
+## 🤖 For AI Agents & Advanced Usage
 
-# 1. Infinite Sum = 1 (0-25s)
+If you are an AI agent or a power user, please refer to [LLM_INSTRUCTIONS.md](LLM_INSTRUCTIONS.md) for detailed pipeline commands, specialized prompting techniques (like forcing `Text()` over `MathTex`), and batch generation examples.
 
-python -m production.produce \
- --concept "Infinite Sum Equals One" \
- --description "Visually prove that 1/2 + 1/4 + 1/8 + ... = 1. Start with a unit square. Fill half (left). Then fill half of the remaining right side (top right). Then fill half of the remaining bottom right. Continue this spiral pattern. Shape value labels like 1/2, 1/4 go INSIDE each shape. Title must have large gap from content." \
- --url "https://www.youtube.com/watch?v=J90L73YOR3k" \
- --start 0 \
- --output "infinite_sum_prod"
+### Example: High-Precision Prompting
+
+```bash
+source .venv/bin/activate && python -m production.produce \
+  --concept "Gabriel's Horn" \
+  --description "Gabriel's Horn paradox... Use Text() ONLY... CRITICAL LAYOUT RULE..." \
+  --cache "gabriels_horn_shared" \
+  --length 50 \
+  --output "gabriels_horn_centered_3" \
+  --count 4
+```

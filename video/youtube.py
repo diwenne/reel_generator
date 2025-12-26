@@ -6,8 +6,8 @@ from pathlib import Path
 from config import PROJECT_ROOT, REEL_WIDTH, YOUTUBE_HEIGHT
 
 # Dedicated directory for YouTube downloads
-YOUTUBE_CACHE_DIR = PROJECT_ROOT / "youtube_cache"
-YOUTUBE_CACHE_DIR.mkdir(exist_ok=True)
+YOUTUBE_CACHE_DIR = PROJECT_ROOT / "cache" / "youtube"
+YOUTUBE_CACHE_DIR.mkdir(exist_ok=True, parents=True)
 
 # Timeout settings (in seconds)
 DOWNLOAD_TIMEOUT = 400  # 3 minutes for yt-dlp download

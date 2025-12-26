@@ -56,11 +56,17 @@ class DynamicScene(Scene):
                 # Common LLM mistakes: these don't exist in Manim
                 'BOTTOM': DOWN,
                 'TOP': UP,
+                'CYAN': TEAL,  # CYAN doesn't exist in Manim, use TEAL
                 # Corner aliases (LLMs often use these)
                 'BL': DL,  # Bottom-left
                 'BR': DR,  # Bottom-right
                 'TL': UL,  # Top-left
                 'TR': UR,  # Top-right
+                # Animation aliases (AI sometimes uses these directional variants)
+                'GrowFromLeft': lambda m: GrowFromEdge(m, LEFT),
+                'GrowFromRight': lambda m: GrowFromEdge(m, RIGHT),
+                'GrowFromTop': lambda m: GrowFromEdge(m, UP),
+                'GrowFromBottom': lambda m: GrowFromEdge(m, DOWN),
                 # Helper functions
                 'normalize': lambda v: v / np.linalg.norm(v) if np.linalg.norm(v) > 0 else v,
                 # Python builtins

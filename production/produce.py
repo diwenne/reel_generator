@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import config
 
 # Now import modules that depend on config
-from pipeline.full_reel import create_full_reel
+from pipeline.full_reel import create_full_reel, create_batch_reels
 from production.metadata import generate_caption, get_youtube_title
 
 # Clean production output directory
@@ -31,6 +31,7 @@ def produce_reel():
     parser.add_argument("--start", "-s", type=float, default=0, help="YouTube start time")
     parser.add_argument("--length", "-l", type=int, default=60, help="Target length")
     parser.add_argument("--output", "-o", help="Output name")
+    parser.add_argument("--count", "-n", type=int, default=1, help="Number of variations to generate")
     
     args = parser.parse_args()
     
@@ -56,32 +57,75 @@ def produce_reel():
         print(f"YouTube: Using cache '{args.cache}'")
     else:
         print(f"YouTube: {args.url} (start={args.start}s)")
+    if args.count > 1:
+        print(f"Variations: {args.count}")
     print(f"{'='*60}\n")
     
-    # Step 1: Create the video reel (uses internal messy directories)
-    print("Step 1/3: Creating video reel...")
-    try:
-        final_video_path = create_full_reel(
-            concept=args.concept,
-            description=args.description,
-            youtube_url=args.url,
-            youtube_start=args.start,
-            length=args.length,
-            output_name=output_name,
-            youtube_cache=args.cache
-        )
-    except Exception as e:
-        print(f"FAILED to create video: {e}")
-        import traceback
-        traceback.print_exc()
-        return None
+    # Generate videos
+    successful_videos = []
     
-    # Step 2: Copy final video to clean production directory
+    # Use batch mode when count > 1 AND using a URL (not cache)
+    # This downloads YouTube ONCE for all variations
+    if args.count > 1 and args.url and not args.cache:
+        print("Using BATCH MODE (YouTube downloaded once for all variations)")
+        try:
+            successful_videos = create_batch_reels(
+                concept=args.concept,
+                description=args.description,
+                youtube_url=args.url,
+                youtube_start=args.start,
+                length=args.length,
+                output_name=output_name,
+                count=args.count
+            )
+        except Exception as e:
+            print(f"BATCH GENERATION FAILED: {e}")
+            import traceback
+            traceback.print_exc()
+    else:
+        # Single variation or cache mode - use per-variation approach
+        for variation in range(1, args.count + 1):
+            if args.count > 1:
+                variation_name = f"{output_name}_v{variation}"
+                print(f"\n{'='*60}")
+                print(f"GENERATING VARIATION {variation}/{args.count}")
+                print(f"{'='*60}\n")
+            else:
+                variation_name = output_name
+            
+            print(f"Step 1/3: Creating video reel...")
+            try:
+                final_video_path = create_full_reel(
+                    concept=args.concept,
+                    description=args.description,
+                    youtube_url=args.url,
+                    youtube_start=args.start,
+                    length=args.length,
+                    output_name=variation_name,
+                    youtube_cache=args.cache
+                )
+                successful_videos.append((variation, final_video_path))
+            except Exception as e:
+                print(f"FAILED to create video (variation {variation}): {e}")
+                import traceback
+                traceback.print_exc()
+                continue
+    
+    # Step 2: Copy final videos to clean production directory
     print("\nStep 2/3: Copying to production output...")
-    prod_video = prod_dir / "reel.mp4"
     prod_dir.mkdir(parents=True, exist_ok=True)  # Ensure directory exists (safety)
-    shutil.copy(final_video_path, prod_video)
-    print(f"  Video: {prod_video}")
+    
+    for variation_num, video_path in successful_videos:
+        if args.count > 1:
+            prod_video = prod_dir / f"reel_v{variation_num}.mp4"
+        else:
+            prod_video = prod_dir / "reel.mp4"
+        shutil.copy(video_path, prod_video)
+        print(f"  Video: {prod_video}")
+    
+    if not successful_videos:
+        print("  No videos were generated successfully.")
+        return None
     
     # Save the prompt used for this generation
     from content.prompts import COMBINED_GENERATION_PROMPT

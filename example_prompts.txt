@@ -1,6 +1,0 @@
-source .venv/bin/activate && python cli.py full --concept "Triangle Angle Sum Proof" --description "Visually prove why the sum of angles in a triangle is 180 degrees by drawing a parallel line to the base through the top vertex and using alternate interior angles to show they form a straight line." --length 60 --output "triangle_angle_sum"
-=== FULL PIPELINE ===
-Concept: Triangle Angle Sum Proof
-Description: Visually prove why the sum of angles in a triangle is 180 degrees by drawing a parallel line to the base through the top vertex and using alternate interior angles to show they form a straight line.
-Length: 60s
-

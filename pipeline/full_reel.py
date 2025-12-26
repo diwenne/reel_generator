@@ -164,6 +164,152 @@ def create_full_reel(
     return final_path
 
 
+def create_batch_reels(
+    concept: str,
+    description: str,
+    youtube_url: str,
+    youtube_start: float = 0,
+    length: int = 60,
+    output_name: str = None,
+    youtube_volume: float = YOUTUBE_VOLUME,
+    youtube_fade_in: float = 1.0,
+    count: int = 3
+) -> list[tuple[int, Path]]:
+    """
+    Generate multiple animation variations, download YouTube ONCE, then combine each.
+    
+    This is more efficient than downloading per-variation because:
+    1. All animations are generated first
+    2. We find the MAX duration needed
+    3. YouTube is downloaded once with that max duration
+    4. Each animation is stacked with the same YouTube clip
+    
+    Returns:
+        List of (variation_number, final_path) tuples for successful generations
+    """
+    if output_name is None:
+        output_name = concept.lower().replace(" ", "_")
+    
+    print(f"\n{'='*60}")
+    print(f"BATCH GENERATION: {concept} ({count} variations)")
+    print(f"{'='*60}\n")
+    
+    # Step 1: Generate ALL animations first
+    print("=" * 40)
+    print("PHASE 1: Generating all animations")
+    print("=" * 40)
+    
+    animations = []  # List of (variation_num, animation_path, duration)
+    
+    for i in range(1, count + 1):
+        variation_name = f"{output_name}_v{i}"
+        print(f"\n--- Variation {i}/{count} ---")
+        
+        try:
+            # Generate content
+            print(f"  Generating Manim content...")
+            content_result = generate_content(
+                concept=concept,
+                description=description,
+                length=length,
+                output_name=variation_name
+            )
+            
+            # Render animation
+            print(f"  Rendering animation...")
+            visual_plan_path = content_result.output_dir / "visual_plan.json"
+            animation_path = content_result.output_dir / "animation.mp4"
+            render_from_plan(visual_plan_path, animation_path)
+            
+            # Get duration
+            duration = get_video_duration(animation_path)
+            print(f"  ✓ Duration: {duration:.1f}s")
+            
+            animations.append((i, animation_path, duration, variation_name))
+        except Exception as e:
+            print(f"  ✗ Failed: {e}")
+            continue
+    
+    if not animations:
+        raise RuntimeError("No animations were generated successfully")
+    
+    # Step 2: Find max duration and download YouTube ONCE
+    max_duration = max(a[2] for a in animations)
+    print(f"\n{'='*40}")
+    print(f"PHASE 2: Downloading YouTube ({max_duration:.1f}s)")
+    print(f"{'='*40}\n")
+    
+    youtube_cropped = download_and_crop_youtube(
+        url=youtube_url,
+        start_time=youtube_start,
+        duration=max_duration,
+        output_name=f"{output_name}_shared"
+    )
+    print(f"✓ YouTube downloaded: {youtube_cropped}")
+    
+    # Step 3: Stack each animation with the YouTube clip
+    print(f"\n{'='*40}")
+    print(f"PHASE 3: Stacking {len(animations)} videos")
+    print(f"{'='*40}\n")
+    
+    results = []
+    
+    for variation_num, animation_path, duration, variation_name in animations:
+        print(f"  Stacking variation {variation_num}...")
+        
+        reel_dir = FINAL_OUTPUT_DIR / variation_name
+        reel_dir.mkdir(exist_ok=True)
+        final_path = reel_dir / "final.mp4"
+        
+        # Calculate fade out timing
+        fade_out_start = max(0, duration - youtube_fade_in)
+        
+        # Build ffmpeg filter (same layout as create_full_reel)
+        # Layout: Safe Zone (100px) + Animation (960px) + Bottom Buffer (60px) + YouTube (800px) = 1920px
+        top_section_height = SAFE_ZONE_HEIGHT + ANIMATION_HEIGHT + BOTTOM_BUFFER_HEIGHT
+        filter_complex = (
+            f"[0:v]pad={REEL_WIDTH}:{top_section_height}:0:{SAFE_ZONE_HEIGHT}:black[padded];"
+            f"[padded]pad={REEL_WIDTH}:{top_section_height}:0:0:black[top];"
+            f"[1:v]trim=duration={duration},setpts=PTS-STARTPTS,scale={REEL_WIDTH}:{YOUTUBE_HEIGHT},"
+            f"fade=t=in:st=0:d={youtube_fade_in},fade=t=out:st={fade_out_start}:d={youtube_fade_in}[bottom];"
+            f"[top][bottom]vstack=inputs=2[v];"
+            f"[1:a]atrim=duration={duration},asetpts=PTS-STARTPTS,volume={youtube_volume},"
+            f"afade=t=in:st=0:d={youtube_fade_in},afade=t=out:st={fade_out_start}:d={youtube_fade_in}[a]"
+        )
+        
+        stack_cmd = [
+            "ffmpeg",
+            "-i", str(animation_path),
+            "-i", str(youtube_cropped),
+            "-filter_complex", filter_complex,
+            "-map", "[v]",
+            "-map", "[a]",
+            "-c:v", "libx264",
+            "-preset", "medium",
+            "-crf", "23",
+            "-c:a", "aac",
+            "-b:a", "128k",
+            "-t", str(duration),
+            "-shortest",
+            "-y",
+            str(final_path)
+        ]
+        
+        result = subprocess.run(stack_cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"    ✗ Failed to stack: {result.stderr[:200]}")
+            continue
+        
+        print(f"    ✓ {final_path}")
+        results.append((variation_num, final_path))
+    
+    print(f"\n{'='*60}")
+    print(f"✓ BATCH COMPLETE: {len(results)}/{count} videos generated")
+    print(f"{'='*60}\n")
+    
+    return results
+
+
 if __name__ == "__main__":
     import sys
     
