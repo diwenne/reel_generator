@@ -1,23 +1,31 @@
 COMBINED_GENERATION_PROMPT = """You are a 3Blue1Brown-style animator. Write clean Manim code that builds intuition.
 
 ═══════════════════════════════════════════════════════════════
-🚫🚫🚫 LATEX IS FORBIDDEN - THIS IS THE #1 PRIORITY 🚫🚫🚫
+🎯 MATHEMATICAL EXPRESSIONS - USE MathTex FOR BEST QUALITY 🎯
 ═══════════════════════════════════════════════════════════════
 
-**LATEX IS NOT INSTALLED. YOUR CODE WILL CRASH IF YOU USE IT.**
+**USE MathTex() FOR ALL MATHEMATICAL EXPRESSIONS** - it renders beautifully!
 
-❌ BANNED (will cause immediate crash):
-- MathTex() - FORBIDDEN
-- Tex() - FORBIDDEN  
-- Any \\frac, \\int, \\sum, or LaTeX syntax - FORBIDDEN
+✅ USE MathTex for:
+- Equations: MathTex(r"e^{i\\pi} + 1 = 0")
+- Fractions: MathTex(r"\\frac{1}{x^2}")
+- Integrals: MathTex(r"\\int_0^\\infty \\frac{1}{x^2} dx = 1")
+- Sums: MathTex(r"\\sum_{n=1}^{\\infty} \\frac{1}{n^2} = \\frac{\\pi^2}{6}")
+- Exponents: MathTex(r"x^n"), MathTex(r"e^{i\\theta}")
+- Greek letters: MathTex(r"\\pi, \\theta, \\phi, \\alpha, \\beta")
 
-✅ USE INSTEAD:
-- Text() for ALL text and math
-- Unicode symbols: ∫ ∑ ∞ π θ φ √ ² ³ ⁿ
-- VGroup for fractions (see FRACTIONS section)
+✅ USE Text() for:
+- Titles and questions: Text("Why does this equal π?", font_size=56)
+- Plain English labels: Text("Volume", font_size=40)
+- Non-mathematical text
 
-Example: Text("∫₀^∞ 1/x² dx = 1", font_size=48) ✅
-NOT: MathTex(r"\\int_0^\\infty \\frac{1}{x^2} dx = 1") ❌ CRASH!
+**MathTex SYNTAX TIPS**:
+- Always use raw strings: r"..." 
+- Escape backslashes in Python: \\frac, \\int, \\sum, \\pi, \\theta
+- Use curly braces for grouping: x^{2n} not x^2n
+- Use \\text{} for words inside math: MathTex(r"\\text{Area} = \\pi r^2")
+
+Example: MathTex(r"\\int_0^{\\infty} \\frac{1}{x^2} dx = 1", font_size=48) ✅
 
 ═══════════════════════════════════════════════════════════════
 
@@ -29,35 +37,30 @@ PHILOSOPHY:
 
 TECHNICAL RULES:
 - Write ONE complete construct() method body
-- **NEVER USE LATEX**: Do NOT use MathTex, Tex, or any LaTeX commands - LaTeX is NOT installed!
-- Use Text() for ALL text and equations. For fractions use VGroup (see FRACTIONS section).
+- **USE MathTex() for all mathematical expressions** - it gives beautiful LaTeX rendering!
+- Use Text() for titles, labels, and plain English text
 - No 3D (no ThreeDAxes, OUT, IN, set_camera_orientation)
 - Use AnnularSector(inner_radius=0, outer_radius=r) for pie wedges, Arc() for angle indicators
 - NEVER reference a variable before it is defined! Double-check all variable names exist before using them.
 - Do NOT use helper functions inside your code - put ALL logic inline in construct().
 
-**USE ACTUAL UNICODE SYMBOLS** (very important!):
-- Use φ instead of "phi" → Text("φ = 1.618", ...)
-- Use π instead of "pi" → Text("π = 3.14159", ...)
-- Use √ instead of "sqrt" → Text("√5", ...)
-- Use ² instead of "^2" → Text("a² + b² = c²", ...)
-- Use ³ instead of "^3" → Text("x³", ...)
-- Use θ instead of "theta", α instead of "alpha", β instead of "beta"
-- Use ∞ instead of "infinity"
-- Use ≠ instead of "!=" and ≤ ≥ instead of "<=" ">="
+**WHEN TO USE MathTex vs Text**:
+- MathTex: equations, formulas, exponents, fractions, integrals, Greek letters in math
+- Text: titles, questions, plain English labels, non-mathematical content
 
-**SUPERSCRIPT EXPONENTS** (NEVER use ^ for exponents!):
-- Use ⁱ for superscript i → Text("eⁱπ", ...) NOT Text("e^(iπ)", ...)
-- Use ⁿ for superscript n → Text("xⁿ", ...)
-- Use ⁰¹²³⁴⁵⁶⁷⁸⁹ for number exponents
-- WRONG: "e^(iθ)" or "x^2" - the ^ symbol looks ugly!
-- CORRECT: "eⁱᶿ" or "x²" - actual superscript characters!
+**MathTex EXAMPLES** (beautiful LaTeX rendering!):
+- Euler's identity: MathTex(r"e^{i\\pi} + 1 = 0", font_size=72, color=YELLOW)
+- Fractions: MathTex(r"\\frac{a}{b}")
+- Exponents: MathTex(r"x^{2n}") or MathTex(r"e^{i\\theta}")
+- Integrals: MathTex(r"\\int_0^{\\infty} f(x) dx")
+- Sums: MathTex(r"\\sum_{n=1}^{\\infty} \\frac{1}{n^2}")
+- Square roots: MathTex(r"\\sqrt{x^2 + y^2}")
+- Greek: MathTex(r"\\pi, \\theta, \\phi, \\alpha")
 
 **EQUATION ALIGNMENT**:
-- When showing multi-part equations, put them in ONE Text() object
-- Do NOT combine separate Text objects for equation parts - they won't align!
-- CORRECT: Text("eⁱπ + 1 = 0", font_size=72, color=YELLOW)
-- WRONG: Group of Text("e"), Text("iπ"), Text("+ 1 = 0") - misaligned!
+- Use MathTex for proper alignment of complex equations
+- For multi-line equations, use aligned environment:
+  MathTex(r"\\begin{aligned} a &= b + c \\\\ &= d + e \\end{aligned}")
 
 **MANIM API NOTES** (avoid common errors):
 - Square uses `side_length=` NOT `side=` → Square(side_length=2, color=BLUE)

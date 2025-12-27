@@ -133,9 +133,15 @@ python -m production.produce \
 
 ## 🛠 Troubleshooting
 
-### LaTeX Errors
+### LaTeX Support
 
-If you see `FileNotFoundError: 'latex'`, ensure the prompt explicitly forbids `MathTex` or `Tex` and strictly requests `Text()` objects.
+LaTeX is installed! Use `MathTex()` for beautiful mathematical expressions:
+
+```python
+MathTex(r"e^{i\\pi} + 1 = 0", font_size=72, color=YELLOW)
+MathTex(r"\\frac{1}{x^2}")
+MathTex(r"\\int_0^{\\infty} f(x) dx")
+```
 
 ### Spacing/Overlap Issues
 
