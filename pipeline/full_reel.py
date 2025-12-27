@@ -310,6 +310,129 @@ def create_batch_reels(
     return results
 
 
+def stack_existing_animations(
+    animation_pattern: str,
+    youtube_url: str,
+    youtube_start: float = 0,
+    output_dir: str = None,
+    youtube_volume: float = YOUTUBE_VOLUME,
+    youtube_fade_in: float = 1.0
+) -> list[tuple[str, Path]]:
+    """
+    Stack existing animation files with a YouTube video.
+    Useful for resuming after YouTube download failures.
+    
+    Args:
+        animation_pattern: Glob pattern for animation files, e.g. "output/point_nine_v3_*/animation.mp4"
+        youtube_url: YouTube URL for background
+        youtube_start: Start time for YouTube clip
+        output_dir: Output directory name (defaults to production_output/resumed_stack)
+        youtube_volume: Volume level for YouTube audio
+        youtube_fade_in: Fade in/out duration
+    
+    Returns:
+        List of (animation_name, final_path) tuples
+    """
+    from pathlib import Path
+    import glob
+    
+    # Find all animation files
+    animation_files = sorted(glob.glob(animation_pattern))
+    if not animation_files:
+        raise FileNotFoundError(f"No animation files found matching: {animation_pattern}")
+    
+    print(f"\n{'='*60}")
+    print(f"STACK EXISTING ANIMATIONS")
+    print(f"  Found {len(animation_files)} animation files")
+    print(f"  YouTube: {youtube_url} (start={youtube_start}s)")
+    print(f"{'='*60}\n")
+    
+    # Find max duration
+    durations = []
+    for anim in animation_files:
+        try:
+            dur = get_video_duration(Path(anim))
+            durations.append((anim, dur))
+            print(f"  {Path(anim).parent.name}: {dur:.1f}s")
+        except Exception as e:
+            print(f"  {anim}: ERROR - {e}")
+    
+    if not durations:
+        raise RuntimeError("No valid animation files found")
+    
+    max_duration = max(d[1] for d in durations)
+    print(f"\n  Max duration: {max_duration:.1f}s")
+    
+    # Download YouTube once
+    output_name = output_dir or "resumed_stack"
+    print(f"\n  Downloading YouTube video...")
+    youtube_cropped = download_and_crop_youtube(
+        url=youtube_url,
+        start_time=youtube_start,
+        duration=max_duration + 5,  # Add buffer
+        output_name=f"{output_name}_shared"
+    )
+    print(f"  ✓ YouTube ready: {youtube_cropped}")
+    
+    # Create output directory
+    prod_output = PROJECT_ROOT / "production_output" / output_name
+    prod_output.mkdir(parents=True, exist_ok=True)
+    
+    # Stack each animation
+    results = []
+    for anim_path, duration in durations:
+        anim_path = Path(anim_path)
+        anim_name = anim_path.parent.name
+        reel_dir = prod_output / anim_name
+        reel_dir.mkdir(exist_ok=True)
+        final_path = reel_dir / "reel.mp4"
+        
+        print(f"\n  Stacking {anim_name}...")
+        
+        # Calculate fade timing
+        fade_out_start = max(0, duration - youtube_fade_in)
+        top_section_height = SAFE_ZONE_HEIGHT + ANIMATION_HEIGHT + BOTTOM_BUFFER_HEIGHT
+        
+        filter_complex = (
+            f"[0:v]pad={REEL_WIDTH}:{top_section_height}:0:{SAFE_ZONE_HEIGHT}:black[padded];"
+            f"[padded]pad={REEL_WIDTH}:{top_section_height}:0:0:black[top];"
+            f"[1:v]trim=duration={duration},setpts=PTS-STARTPTS,scale={REEL_WIDTH}:{YOUTUBE_HEIGHT},"
+            f"fade=t=in:st=0:d={youtube_fade_in},fade=t=out:st={fade_out_start}:d={youtube_fade_in}[bottom];"
+            f"[top][bottom]vstack=inputs=2[v];"
+            f"[1:a]atrim=duration={duration},asetpts=PTS-STARTPTS,volume={youtube_volume},"
+            f"afade=t=in:st=0:d={youtube_fade_in},afade=t=out:st={fade_out_start}:d={youtube_fade_in}[a]"
+        )
+        
+        stack_cmd = [
+            "ffmpeg",
+            "-i", str(anim_path),
+            "-i", str(youtube_cropped),
+            "-filter_complex", filter_complex,
+            "-map", "[v]",
+            "-map", "[a]",
+            "-c:v", "libx264",
+            "-c:a", "aac",
+            "-shortest",
+            "-y",
+            str(final_path)
+        ]
+        
+        result = subprocess.run(stack_cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"    ✗ Failed: {result.stderr[:100]}")
+            continue
+        
+        print(f"    ✓ {final_path}")
+        results.append((anim_name, final_path))
+    
+    print(f"\n{'='*60}")
+    print(f"✓ STACKING COMPLETE: {len(results)}/{len(durations)} videos")
+    print(f"  Output: {prod_output}")
+    print(f"{'='*60}\n")
+    
+    return results
+
+
 if __name__ == "__main__":
     import sys
     

@@ -210,44 +210,48 @@ label = Text("1/x").move_to(UP * 1)  # ❌ Might overlap with shape!
 3. Keep x=0 for horizontal centering unless label is specifically for a side element
 
 ═══════════════════════════════════════════════════════════════
-🚨🚨🚨 FINAL CONCLUSION: EVERYTHING MORPHS INTO ONE STATEMENT 🚨🚨🚨
+🚨🚨🚨 FINAL CONCLUSION: CONCEPT NAME + EQUATION 🚨🚨🚨
 ═══════════════════════════════════════════════════════════════
 
-**THE ANIMATION MUST END WITH EXACTLY ONE ELEMENT ON SCREEN**
+**THE ANIMATION MUST END WITH TWO ELEMENTS: CONCEPT NAME + EQUATION**
 
 At the conclusion:
-1. Create the final statement: `final = Text("Sum = 1", font_size=72, color=YELLOW).move_to(ORIGIN)`
-2. Group ALL visible objects: `all_objects = VGroup(title, shapes, labels, equations, ...)`
-3. Morph everything into the final: `self.play(ReplacementTransform(all_objects, final))`
-4. Hold: `self.wait(3)`
+1. Create the CONCEPT NAME as title: `concept_name = Text("The Basel Problem", font_size=48, color=WHITE).move_to(UP * 0.8)`
+2. Create the FINAL EQUATION below it: `final_eq = Text("1 + 1/4 + 1/9 + ... = π²/6", font_size=64, color=YELLOW).move_to(DOWN * 0.5)`
+3. Group them: `final_group = VGroup(concept_name, final_eq)`
+4. Group ALL visible objects: `all_objects = VGroup(title, shapes, labels, equations, ...)`
+5. Morph everything into the final: `self.play(ReplacementTransform(all_objects, final_group))`
+6. Hold: `self.wait(3)`
 
 **COMPLETE ENDING PATTERN**:
 ```python
-# Create the final centered statement
-final_equation = Text("1/2 + 1/4 + ... = 1", font_size=72, color=YELLOW).move_to(ORIGIN)
+# Create the concept name (ABOVE) and equation (BELOW)
+concept_name = Text("Zeno's Paradox", font_size=48, color=WHITE).move_to(UP * 0.8)
+final_equation = Text("1/2 + 1/4 + ... = 1", font_size=64, color=YELLOW).move_to(DOWN * 0.5)
+final_group = VGroup(concept_name, final_equation)
 
 # Gather EVERYTHING currently on screen
 all_visible = VGroup(title, main_square, all_labels, bottom_text)  # Include ALL objects!
 
-# Morph all objects INTO the final statement
-self.play(ReplacementTransform(all_visible, final_equation), run_time=1.5)
+# Morph all objects INTO the final group (name + equation)
+self.play(ReplacementTransform(all_visible, final_group), run_time=1.5)
 
 # Hold on the final result
 self.wait(3)
 ```
 
 **REQUIREMENTS FOR FINAL FRAME**:
-✅ ONLY the final equation visible
-✅ Final equation CENTERED at ORIGIN (not to_edge!)
-✅ font_size=72 or larger, color=YELLOW
+✅ CONCEPT NAME at top (font_size=48, WHITE, at UP * 0.8)
+✅ FINAL EQUATION below it (font_size=64, YELLOW, at DOWN * 0.5)  
+✅ Both centered horizontally (x = 0)
 ✅ ALL other elements (title, shapes, labels) have morphed INTO this
-✅ Nothing else on screen - just black background + final equation
+✅ Nothing else on screen - just black background + name + equation
 
 **WRONG ENDINGS**:
-❌ Final equation off to the side (not centered)
-❌ Title still visible at top
+❌ No concept name shown - MUST include the name of the theorem/concept!
+❌ Equation off to the side (not centered)
+❌ Title still visible at top separately
 ❌ Shapes still visible
-❌ Multiple text elements remaining
 ❌ Using FadeOut on objects instead of morphing them into final
 
 ═══════════════════════════════════════════════════════════════
