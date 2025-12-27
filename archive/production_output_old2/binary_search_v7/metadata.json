@@ -1,0 +1,10 @@
+{
+  "concept": "Binary Search",
+  "description": "Visualize Binary Search. Title 'What is Binary Search' - must START in CENTER then animate UP to top. Show 8 boxes labeled 1-8 at y=0. Search for 6. Show Target 6 at y=2.0. Step 1: Arrow to box 4, label Mid at y=1.2 NOT overlapping Target. Since 6 greater than 4, gray boxes 1-4. Step 2: New mid at 6, found - green. Remove old labels before adding new. Final: Binary Search is O log n in yellow centered.",
+  "youtube_url": "https://www.youtube.com/watch?v=mgQL2xeviN8",
+  "youtube_title": "IT`S VERIFIED!!! | Tidal Wave [NEW TOP 1] - in Perfect Quality (4K, 60fps) - Geometry Dash",
+  "youtube_start": 25.0,
+  "output_name": "binary_search_v7",
+  "title": "Tidal Wave: A New King in Geometry Dash",
+  "hashtag_count": 18
+}

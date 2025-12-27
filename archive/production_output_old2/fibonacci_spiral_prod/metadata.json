@@ -1,0 +1,10 @@
+{
+  "concept": "Fibonacci Spiral",
+  "description": "Build the Fibonacci spiral step by step. Start with 1x1 square, add another 1x1, then 2x2, 3x3, 5x5, 8x8. Each new square tiles perfectly. Draw quarter-circle arcs through each square to form the spiral. Show how it approximates the golden ratio. Labels go inside squares.",
+  "youtube_url": "https://www.youtube.com/watch?v=J90L73YOR3k",
+  "youtube_title": "(Extreme Demon) ''Cataclysm'' 100% by Ggb0y [3 Coins] | Geometry Dash",
+  "youtube_start": 25.0,
+  "output_name": "fibonacci_spiral_prod",
+  "title": "Conquering Cataclysm 100%",
+  "hashtag_count": 20
+}

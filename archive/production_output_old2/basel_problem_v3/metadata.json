@@ -1,0 +1,10 @@
+{
+  "concept": "The Basel Problem",
+  "description": "Prove the famous Basel Problem: the sum of 1/n\u00b2 from n=1 to infinity equals \u03c0\u00b2/6. Start with title 'The Basel Problem'. Show the series written as '1/1\u00b2 + 1/2\u00b2 + 1/3\u00b2 + ...' using superscript \u00b2 characters. Visualize each term as colored bars on a number line. Display running sum at bottom: 'Sum: 1.0', 'Sum: 1.25', etc. Show partial sums approaching \u03c0\u00b2/6 \u2248 1.6449. End with final centered yellow equation: '\u22111/n\u00b2 = \u03c0\u00b2/6'. Keep all text centered, nothing on right edge.",
+  "youtube_url": "https://www.youtube.com/watch?v=mgQL2xeviN8",
+  "youtube_title": "IT`S VERIFIED!!! | Tidal Wave [NEW TOP 1] - in Perfect Quality (4K, 60fps) - Geometry Dash",
+  "youtube_start": 25.0,
+  "output_name": "basel_problem_v3",
+  "title": "Tidal Wave: The New Top 1",
+  "hashtag_count": 20
+}

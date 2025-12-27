@@ -1,0 +1,10 @@
+{
+  "concept": "Gabriel's Horn",
+  "description": "Gabriel's Horn paradox. Title 'Infinite Surface Finite Volume?' starts CENTER then animates UP. Step 1: Show y = 1/x using a PROPER FRACTION with VGroup - Text('1') on top, horizontal Line in middle, Text('x') on bottom, arranged with .arrange(DOWN, buff=0.1). Show 'y =' next to the fraction. Step 2: Draw the curve from x=1 extending right toward infinity. Step 3: Rotating creates horn shape (show as silhouette). Step 4: VOLUME = \u03c0 shown in GREEN. Step 5: SURFACE = \u221e shown in RED. Paradox: Fill with finite paint but can never paint inside. Final: 'V = \u03c0, S = \u221e' yellow centered.",
+  "youtube_url": "https://www.youtube.com/watch?v=CK2xctLZxD0",
+  "youtube_title": "Bloodlust (RTX: ON) - Without LDM in Perfect Quality (4K, 60fps) (22K SPECIAL) - Geometry Dash",
+  "youtube_start": 0.0,
+  "output_name": "gabriels_horn_frac",
+  "title": "Geometry Dash: Bloodlust (RTX ON)",
+  "hashtag_count": 19
+}

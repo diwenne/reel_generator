@@ -1,0 +1,10 @@
+{
+  "concept": "Golden Ratio",
+  "description": "Derive the Golden Ratio \u03c6. Title 'The Golden Ratio \u03c6' starts CENTER then animates UP. Use Text() not Tex or MathTex. Step 1: Draw a line divided into parts a and b. Use Text labels not Brace.get_text. Step 2: Show the property (a+b)/a = a/b = \u03c6 as Text. Step 3: Solve the equation algebraically: \u03c6\u00b2 = \u03c6 + 1. Step 4: Use quadratic formula to get \u03c6 = (1 + \u221a5)/2. Use \u221a symbol. Step 5: Calculate \u03c6 = 1.618. Final: '\u03c6 = 1.618...' in yellow as single Text object.",
+  "youtube_url": null,
+  "youtube_title": "Cached video: binary_search_long_v1",
+  "youtube_start": 0,
+  "output_name": "golden_ratio_final",
+  "title": "Geometry Dash Challenge",
+  "hashtag_count": 20
+}

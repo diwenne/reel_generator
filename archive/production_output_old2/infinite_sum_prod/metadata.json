@@ -1,0 +1,10 @@
+{
+  "concept": "Infinite Sum Equals One",
+  "description": "Visually prove that 1/2 + 1/4 + 1/8 + ... = 1. Start with a unit square. Fill half (left). Then fill half of the remaining right side (top right). Then fill half of the remaining bottom right. Continue this spiral pattern. Shape value labels like 1/2, 1/4 go INSIDE each shape. Title must have large gap from content.",
+  "youtube_url": "https://www.youtube.com/watch?v=J90L73YOR3k",
+  "youtube_title": "(Extreme Demon) ''Cataclysm'' 100% by Ggb0y [3 Coins] | Geometry Dash",
+  "youtube_start": 0.0,
+  "output_name": "infinite_sum_prod",
+  "title": "The Legendary Cataclysm",
+  "hashtag_count": 20
+}

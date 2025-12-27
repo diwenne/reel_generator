@@ -2,7 +2,7 @@
 
 This guide is designed for LLMs to understand how to run the reel generation pipeline effectively.
 
-NOTE: DONT EASILY CHANGE content/prompts.py, instead TUNE THE TERMINAL DESCRIPTIVE PARAMETER
+**IMPORTANT**: Don't easily change `content/prompts.py`. Instead, TUNE THE TERMINAL `--description` PARAMETER to control the animation.
 
 ## 🚀 Environment Setup
 
@@ -12,11 +12,13 @@ Always start by activating the virtual environment:
 source .venv/bin/activate
 ```
 
+---
+
 ## 🏭 Production Pipeline Commands
 
-### 🌟 High-Quality Example: Gabriel's Horn (Detailed Control)
+### 🌟 Example 1: Gabriel's Horn (Math Paradox)
 
-This example demonstrates how to use `production.produce` with a highly detailed prompt to control layout, spacing, and mathematical visuals without LaTeX.
+This example demonstrates controlling layout, spacing, and mathematical visuals without LaTeX.
 
 ```bash
 source .venv/bin/activate && python -m production.produce \
@@ -28,12 +30,46 @@ source .venv/bin/activate && python -m production.produce \
   --count 4
 ```
 
-### 🔁 Batch Generation
+### 🎯 Example 2: Monte Carlo Pi Estimation (Probability/Simulation)
 
-Use `--count N` to generate multiple variations of the same concept in one go. This is useful for finding the best random seed or layout.
+This example shows a step-by-step simulation with strict spacing rules to prevent text overlapping shapes.
 
 ```bash
-# Generate 4 variations of the concept
+source .venv/bin/activate && python -m production.produce \
+  --concept "Monte Carlo Pi" \
+  --description "Estimating π with the Monte Carlo Method. Title at TOP: 'Throwing Darts to Estimate π'. Use Text() ONLY—NO Tex/MathTex.
+
+CRITICAL SPACING RULES - FOLLOW EXACTLY:
+- The square/circle should be SMALL (radius=1.8) and positioned at center-top (y=0.5)
+- ALL formulas and text go in the BOTTOM ZONE (y < -2.5), with at least 0.8 units gap from shapes
+- The bottom text must NOT touch or overlap the circle/square edges
+
+STEPS:
+1. Title starts centered, then moves to top edge
+2. Draw SQUARE centered at (0, 0.5). Draw inscribed CIRCLE inside it. Keep shapes compact.
+3. Label Radius: Draw a horizontal LINE from circle center to edge. Place 'r' label ABOVE the line (not on it).
+4. Throw darts: Generate random dots in the square. GREEN inside circle, RED outside.
+5. Show counters at BOTTOM of screen: 'Darts: N' and 'Hits: I'
+6. Show formula text at BOTTOM (y=-3.2): 'π ≈ 4 × (Hits/Darts)'
+7. Show live estimate updating: 'π ≈ 3.00 → 3.14...'
+8. Speed up dot generation
+9. Final: Clear all, show 'Monte Carlo Method' and 'π ≈ 3.14159' in YELLOW centered
+
+Keep shapes SMALL. Keep text in BOTTOM ZONE. No overlap ever." \
+  --url "https://www.youtube.com/watch?v=1YI4oUUiV80" \
+  --start 0 \
+  --length 60 \
+  --count 6 \
+  --output "monte_carlo_pi_v9"
+```
+
+---
+
+## 🔁 Batch Generation
+
+Use `--count N` to generate multiple variations of the same concept in one go. This is useful for finding the best layout from multiple LLM attempts.
+
+```bash
 python -m production.produce \
   --concept "Concept Name" \
   --description "Description..." \
@@ -42,9 +78,18 @@ python -m production.produce \
   --output "concept_batch_test"
 ```
 
-### 📹 Using YouTube Cache vs. URL
+**How batch mode works:**
+
+- When using `--url` with `--count > 1`, YouTube is downloaded ONCE and reused for all variations
+- When using `--cache`, no download happens at all
+- All animations are generated first, then stacked with YouTube
+
+---
+
+## 📹 Using YouTube Cache vs. URL
 
 **Option A: Using Cached Video (Recommended for iterations)**
+
 Reference a folder name inside `cache/youtube/`.
 
 ```bash
@@ -56,6 +101,7 @@ python -m production.produce \
 ```
 
 **Option B: Downloading New Video**
+
 Provide a full YouTube URL and start time.
 
 ```bash
@@ -67,7 +113,9 @@ python -m production.produce \
   --output "new_download"
 ```
 
-### 🧩 Full Pipeline Options (Reference)
+---
+
+## 🧩 Full Pipeline Options (Reference)
 
 | Flag            | Description                            | Example                     |
 | --------------- | -------------------------------------- | --------------------------- |
@@ -79,9 +127,50 @@ python -m production.produce \
 | `--length`      | Length of Manim animation (seconds)    | `60`                        |
 | `--output`      | Output folder name                     | `"binary_search_v1"`        |
 | `--count`       | Number of versions to generate         | `3`                         |
+| `--fade`        | Fade in/out duration for YouTube (sec) | `2.0`                       |
+
+---
 
 ## 🛠 Troubleshooting
 
-- **Latex Errors**: If you see `FileNotFoundError: 'latex'`, ensure the prompt explicitly forbids `MathTex` or `Tex` and strictly requests `Text()` objects.
-- **Spacing Issues**: Use aggressive words like "CRITICAL LAYOUT RULE", "isolating", "padding", and "margin" in the prompt.
-- **YouTube Errors**: If download fails, try a different video or use `--cache` if you already have a successful download.
+### LaTeX Errors
+
+If you see `FileNotFoundError: 'latex'`, ensure the prompt explicitly forbids `MathTex` or `Tex` and strictly requests `Text()` objects.
+
+### Spacing/Overlap Issues
+
+Use aggressive words in the prompt:
+
+- "CRITICAL LAYOUT RULE"
+- "y < -2.5 for bottom zone"
+- "at least 0.8 units gap"
+- "NO text may overlap shapes"
+- "Keep shapes SMALL (radius=1.8)"
+
+### YouTube Errors
+
+If download fails, try a different video or use `--cache` if you already have a successful download.
+
+### Animation Not Rendering (Played 0 animations)
+
+This means the scene's `construct()` method didn't run any `self.play()` calls. Check the generated `output/<name>/scene.py` for syntax errors or nested `def construct` issues.
+
+---
+
+## 📂 Output Structure
+
+After running, you'll find:
+
+```
+production_output/<output_name>/
+├── reel.mp4          # Final video (or reel_v1.mp4, reel_v2.mp4... for batch)
+├── command.sh        # The exact command used (for reproducibility)
+├── title.txt         # Reel title
+├── description.txt   # Caption body with YouTube credit
+├── hashtags.txt      # All hashtags
+├── caption.txt       # Full combined caption
+├── metadata.json     # Reel metadata
+└── prompt_used.txt   # The system prompt used
+```
+
+Move successful reels to `verified_reels/` for safekeeping.

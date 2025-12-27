@@ -1,0 +1,10 @@
+{
+  "concept": "Eulers Identity",
+  "description": "Show e^i\u03c0 + 1 = 0. Title 'The Most Beautiful Equation' starts CENTER then animates UP. Show constants: e = 2.718 in BLUE, i = \u221a-1 in GREEN, \u03c0 = 3.14159 in RED. Explain that multiplying by i rotates by 90 degrees. Show e^i\u03c0 rotates from 1 to -1 on a number line. Use actual \u03c0 symbol not pi. Put final equation in ONE Text object centered: 'e^i\u03c0 + 1 = 0' all in YELLOW. No separate Text objects for equation parts. Keep labels away from axes.",
+  "youtube_url": null,
+  "youtube_title": "Cached video: binary_search_v6",
+  "youtube_start": 0,
+  "output_name": "euler_v3",
+  "title": "Geometry Dash: Precision Run",
+  "hashtag_count": 20
+}

@@ -1,0 +1,10 @@
+{
+  "concept": "Infinite Sum Equals 1",
+  "description": "Show visually how 1/2 + 1/4 + 1/8 + 1/16 + ... = 1 using a square that gets progressively filled. Start with a unit square, fill half, then half of remaining, etc. Show the sum building up as fractions are added. End with the dramatic reveal that it equals exactly 1.",
+  "youtube_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  "youtube_title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
+  "youtube_start": 0.0,
+  "output_name": "infinite_sum_v6",
+  "title": "The Ultimate Rickroll",
+  "hashtag_count": 20
+}

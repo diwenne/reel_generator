@@ -236,18 +236,14 @@ reel-generator/
 ├── config.py               # Configuration (dimensions, API keys)
 ├── requirements.txt        # Python dependencies
 ├── .env                    # API keys (create this!)
+├── LLM_INSTRUCTIONS.md     # Guide for AI agents with example prompts
 │
 ├── content/
 │   ├── generator.py        # LLM content generation (Gemini/GPT)
 │   └── prompts.py          # System prompts for 3b1b-style animations
 │
 ├── rendering/
-│   ├── renderer.py         # Manim scene rendering
-│   └── voice.py            # OpenAI TTS voice synthesis
-│
-├── composition/
-│   ├── compositor.py       # Video + audio combining
-│   └── sfx.py              # Sound effects overlay
+│   └── renderer.py         # Manim scene rendering (dynamic module import)
 │
 ├── video/
 │   └── youtube.py          # YouTube download + crop
@@ -255,10 +251,15 @@ reel-generator/
 ├── pipeline/
 │   └── full_reel.py        # Full pipeline: generate + render + stack
 │
-├── assets/sfx/             # Sound effect files
-├── output/                 # Generated content (per-concept folders)
-├── final_reels/            # Final combined reels
-└── youtube_cache/          # Cached YouTube downloads
+├── production/
+│   ├── produce.py          # Production pipeline with caption generation
+│   └── metadata.py         # Caption/hashtag generation
+│
+├── output/                 # Generated content (intermediate files, scene.py)
+├── production_output/      # Final production reels with captions
+├── verified_reels/         # Manually verified good reels (move here to keep)
+├── cache/youtube/          # Cached YouTube downloads
+└── archive/                # Old/unused files
 ```
 
 ---

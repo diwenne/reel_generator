@@ -1,0 +1,10 @@
+{
+  "concept": "Golden Ratio",
+  "description": "Show the Golden Ratio \u03c6. Title 'The Golden Ratio \u03c6' starts at CENTER then animates UP. Use the actual \u03c6 symbol not phi. Draw a golden rectangle using Rectangle with width=2.618 and height=1.618 in GOLD color. Show the ratio width/height = \u03c6. Display the formula \u03c6 = (1 + \u221a5) / 2 using actual \u221a symbol. Show \u03c6 = 1.618... Make all labels clear and positioned away from shapes. Final equation in ONE single Text object: '\u03c6 = 1.618...' in large yellow centered. Use side_length for Square not side.",
+  "youtube_url": null,
+  "youtube_title": "Cached video: binary_search_v6",
+  "youtube_start": 0,
+  "output_name": "golden_ratio_v4",
+  "title": "Precision in Geometry Dash",
+  "hashtag_count": 20
+}

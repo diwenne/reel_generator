@@ -1,0 +1,7 @@
+
+Geometry Dash is a rhythm-based platformer developed by RobTop Games. Players control a customizable icon that moves automatically across the screen. The primary goal is to navigate through a series of obstacles, such as spikes and walls, without crashing.
+
+The gameplay relies heavily on musical synchronization. Users must time their jumps and movements to match the beat of the soundtrack. Each level presents a unique layout and difficulty setting, requiring focus and quick reflexes to complete successfully.
+
+🎥 Gameplay: Cached video: binary_search_v6
+🔗 None

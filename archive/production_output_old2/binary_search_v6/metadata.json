@@ -1,0 +1,10 @@
+{
+  "concept": "Binary Search",
+  "description": "Visualize how Binary Search works. Title: 'What is Binary Search?'. Show 8 sorted boxes labeled 1-8 in a row at y=0.5. Search for 6. Step 1: Check middle (4), show '6 > 4', gray out left boxes 1-4. Step 2: Check middle of right half (6), found it - turn green! Show text 'Found in 2 steps!' at bottom. Keep title at TOP CENTER (not corner). All arrows and labels must stay below y=2.0. Final: 'Binary Search = O(log n)' in yellow centered.",
+  "youtube_url": "https://www.youtube.com/watch?v=mgQL2xeviN8",
+  "youtube_title": "IT`S VERIFIED!!! | Tidal Wave [NEW TOP 1] - in Perfect Quality (4K, 60fps) - Geometry Dash",
+  "youtube_start": 25.0,
+  "output_name": "binary_search_v6",
+  "title": "Tidal Wave Verified: The New Top 1",
+  "hashtag_count": 20
+}

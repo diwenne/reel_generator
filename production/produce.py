@@ -6,6 +6,7 @@ Clean production output - only final deliverables in production_output/.
 import argparse
 import shutil
 import sys
+import shlex
 from pathlib import Path
 
 # Add project root to path
@@ -32,6 +33,7 @@ def produce_reel():
     parser.add_argument("--length", "-l", type=int, default=60, help="Target length")
     parser.add_argument("--output", "-o", help="Output name")
     parser.add_argument("--count", "-n", type=int, default=1, help="Number of variations to generate")
+    parser.add_argument("--fade", type=float, default=1.0, help="Fade in/out duration for YouTube background (seconds)")
     
     args = parser.parse_args()
     
@@ -49,6 +51,14 @@ def produce_reel():
     # Setup clean production output directory
     prod_dir = PRODUCTION_OUTPUT / output_name
     prod_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Save command for reproducibility
+    cmd_str = "source .venv/bin/activate && python -m production.produce " + shlex.join(sys.argv[1:])
+    try:
+        (prod_dir / "command.sh").write_text(cmd_str)
+        print(f"  Saved command to {prod_dir / 'command.sh'}")
+    except Exception as e:
+        print(f"  Warning: Could not save command file: {e}")
         
     print(f"{'='*60}")
     print(f"PRODUCTION PIPELINE: {args.concept}")
@@ -76,7 +86,8 @@ def produce_reel():
                 youtube_start=args.start,
                 length=args.length,
                 output_name=output_name,
-                count=args.count
+                count=args.count,
+                youtube_fade_in=args.fade
             )
         except Exception as e:
             print(f"BATCH GENERATION FAILED: {e}")
@@ -102,7 +113,8 @@ def produce_reel():
                     youtube_start=args.start,
                     length=args.length,
                     output_name=variation_name,
-                    youtube_cache=args.cache
+                    youtube_cache=args.cache,
+                    youtube_fade_in=args.fade
                 )
                 successful_videos.append((variation, final_video_path))
             except Exception as e:

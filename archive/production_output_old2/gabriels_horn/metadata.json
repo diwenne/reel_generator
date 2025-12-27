@@ -1,0 +1,10 @@
+{
+  "concept": "Gabriel's Horn",
+  "description": "Gabriels Horn paradox - infinite surface area but finite volume. Title 'Infinite Surface, Finite Volume?' starts CENTER then animates UP. Use Text() not MathTex. Step 1: Show the curve y = 1/x from x=1 to x=5. Step 2: Rotate this curve around x-axis to create a 3D horn shape (show as 2D cross section). Step 3: Show that as horn extends to infinity, VOLUME converges to \u03c0. Step 4: But SURFACE AREA grows to infinity. Step 5: Paradox: You can FILL it with a finite amount of paint, but you can NEVER paint the inside. Show Volume = \u03c0 in GREEN, Surface = \u221e in RED. Final: 'V = \u03c0, S = \u221e' in yellow centered.",
+  "youtube_url": "https://www.youtube.com/watch?v=CK2xctLZxD0",
+  "youtube_title": "Bloodlust (RTX: ON) - Without LDM in Perfect Quality (4K, 60fps) (22K SPECIAL) - Geometry Dash",
+  "youtube_start": 0.0,
+  "output_name": "gabriels_horn",
+  "title": "Bloodlust: RTX On",
+  "hashtag_count": 20
+}

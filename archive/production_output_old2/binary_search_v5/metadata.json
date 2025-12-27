@@ -1,0 +1,10 @@
+{
+  "concept": "Binary Search",
+  "description": "Visualize how Binary Search works. Title: 'What is Binary Search?'. Show a sorted array of numbers 1-16 as boxes in a row, positioned in the CENTER zone (around y=0). Search for 11. Step 1: Highlight middle (8), show comparison '11 > 8', gray out left half. Step 2: Highlight middle (12), '11 < 12', gray out right. Step 3: Check 10, '11 > 10'. Step 4: Found 11, highlight green. Keep all annotations BELOW the title - arrows and labels should be near the array, not touching the title zone. Final: 'Binary Search = O(log n)' in yellow centered.",
+  "youtube_url": "https://www.youtube.com/watch?v=mgQL2xeviN8",
+  "youtube_title": "IT`S VERIFIED!!! | Tidal Wave [NEW TOP 1] - in Perfect Quality (4K, 60fps) - Geometry Dash",
+  "youtube_start": 25.0,
+  "output_name": "binary_search_v5",
+  "title": "Tidal Wave: The New Top 1",
+  "hashtag_count": 20
+}

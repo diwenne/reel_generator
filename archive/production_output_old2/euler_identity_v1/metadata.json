@@ -1,0 +1,10 @@
+{
+  "concept": "Eulers Identity",
+  "description": "Show the most beautiful equation in math: e to the i pi equals negative 1. Title 'The Most Beautiful Equation' starts at CENTER then animates UP. Show the equation building piece by piece: first e in blue, then i in green, then pi in red, then the equals sign, then -1 in yellow. Explain briefly with text: e is 2.718, i is sqrt of -1, pi is 3.14159. Show how these 3 constants combine to equal exactly -1. Final reveal: e^(i\u03c0) + 1 = 0 in large yellow centered - the complete Euler identity.",
+  "youtube_url": null,
+  "youtube_title": "Cached video: binary_search_v6",
+  "youtube_start": 0,
+  "output_name": "euler_identity_v1",
+  "title": "Geometry Dash: Rhythm and Reflexes",
+  "hashtag_count": 20
+}

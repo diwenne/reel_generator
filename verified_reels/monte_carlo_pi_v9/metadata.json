@@ -1,0 +1,10 @@
+{
+  "concept": "Monte Carlo Pi",
+  "description": "Estimating \u03c0 with the Monte Carlo Method. Title at TOP: 'Throwing Darts to Estimate \u03c0'. Use Text() ONLY\u2014NO Tex/MathTex. \n\nCRITICAL SPACING RULES - FOLLOW EXACTLY:\n- The square/circle should be SMALL (radius=1.8) and positioned at center-top (y=0.5)\n- ALL formulas and text go in the BOTTOM ZONE (y < -2.5), with at least 0.8 units gap from shapes\n- The bottom text must NOT touch or overlap the circle/square edges\n\nSTEPS:\n1. Title starts centered, then moves to top edge\n2. Draw SQUARE centered at (0, 0.5). Draw inscribed CIRCLE inside it. Keep shapes compact.\n3. Label Radius: Draw a horizontal LINE from circle center to edge. Place 'r' label ABOVE the line (not on it).\n4. Throw darts: Generate random dots in the square. GREEN inside circle, RED outside.\n5. Show counters at BOTTOM of screen: 'Darts: N' and 'Hits: I'\n6. Show formula text at BOTTOM (y=-3.2): '\u03c0 \u2248 4 \u00d7 (Hits/Darts)'\n7. Show live estimate updating: '\u03c0 \u2248 3.00 \u2192 3.14...'\n8. Speed up dot generation\n9. Final: Clear all, show 'Monte Carlo Method' and '\u03c0 \u2248 3.14159' in YELLOW centered\n\nKeep shapes SMALL. Keep text in BOTTOM ZONE. No overlap ever.",
+  "youtube_url": "https://www.youtube.com/watch?v=1YI4oUUiV80",
+  "youtube_title": "Geometry Dash - Theory of Everything 2 100% (All Coins)",
+  "youtube_start": 0.0,
+  "output_name": "monte_carlo_pi_v9",
+  "title": "Theory of Everything 2 Completed",
+  "hashtag_count": 20
+}

@@ -1,0 +1,10 @@
+{
+  "concept": "Gabriel's Horn",
+  "description": "Gabriel's Horn paradox. Title 'Infinite Surface Finite Volume?' centered at top. Use Text() ONLY - absolutely NO MathTex or Tex. Step 1: Show equation y = 1/x using VGroup fraction (Text 1 on top, Line, Text x on bottom) - position this in CENTER of screen. Step 2: Draw the 1/x curve from x=1 extending right, keep it CENTERED horizontally. Step 3: Show horn shape below the curve. Step 4: Show Volume = \u03c0 in GREEN centered. Step 5: Surface = \u221e in RED centered below Volume. Step 6: 'Fill inside? YES' and 'Paint surface? NO' paradox text centered. Final: 'Gabriel's Horn' title BLUE centered, 'V = \u03c0, S = \u221e' YELLOW centered below. ALL text should be horizontally CENTERED (x=0).",
+  "youtube_url": null,
+  "youtube_title": "Cached video: gabriels_horn_shared",
+  "youtube_start": 0,
+  "output_name": "gabriels_horn_centered",
+  "title": "Geometry Dash: Rhythm & Reflexes",
+  "hashtag_count": 19
+}

@@ -110,27 +110,27 @@ class DynamicScene(Scene):
         
         lines = code.split('\n')
         new_lines = []
+        inside_class = False
         
         for line in lines:
             stripped = line.strip()
             
-            # Skip import statements
-            if stripped.startswith('from manim import') or stripped.startswith('import manim'):
-                continue
-            if stripped.startswith('import numpy') or stripped.startswith('from numpy'):
+            # Skip ALL import statements (any line starting with import or from X import)
+            if stripped.startswith('import ') or stripped.startswith('from '):
                 continue
             
-            # Skip class definition lines like "class BinarySearchVis(Scene):"
-            if re.match(r'^class\s+\w+\s*\(.*Scene.*\)\s*:', stripped):
+            # Skip class definition lines like "class MonteCarloPi(Scene):"
+            if re.match(r'^class\s+\w+', stripped):
+                inside_class = True
                 continue
             
-            # Skip construct definition
-            if stripped in ('def construct(self):', 'def construct(self) -> None:'):
+            # Skip construct definition (or any def inside the class at first level)
+            if inside_class and re.match(r'^def\s+construct\s*\(', stripped):
                 continue
             
             new_lines.append(line)
         
-        # Remove leading blank lines (they can mess up dedent)
+        # Remove leading blank lines (they mess up dedent)
         while new_lines and not new_lines[0].strip():
             new_lines.pop(0)
         
@@ -171,19 +171,16 @@ class DynamicScene(Scene):
 def render_from_plan(visual_plan_path: Path, output_path: Path = None) -> tuple:
     """Render Manim video and return SFX events.
     
+    Uses dynamic module import from scene.py for robust code execution.
+    
     Returns:
         Tuple of (video_path, sfx_events)
     """
-    with open(visual_plan_path) as f:
-        data = json.load(f)
-    
-    # Get the manim code
-    if isinstance(data, dict):
-        manim_code = data.get("manim_code", "")
-    else:
-        manim_code = "self.play(Write(Text('Upgrade to new format', color=WHITE)))"
+    import importlib.util
+    import sys
     
     output_dir = visual_plan_path.parent
+    scene_file = output_dir / "scene.py"
     media_dir = output_dir / "media"
     media_dir.mkdir(exist_ok=True)
     
@@ -196,13 +193,68 @@ def render_from_plan(visual_plan_path: Path, output_path: Path = None) -> tuple:
     config.write_to_movie = True
     config.format = "mp4"
     
-    scene = DynamicScene(manim_code)
+    # Check if scene.py exists
+    if not scene_file.exists():
+        raise FileNotFoundError(f"scene.py not found at {scene_file}")
+    
+    # Dynamically import the scene.py module
+    module_name = f"generated_scene_{output_dir.name}"
+    spec = importlib.util.spec_from_file_location(module_name, scene_file)
+    module = importlib.util.module_from_spec(spec)
+    
+    # Track classes that exist BEFORE loading the module (these are manim built-ins)
+    import manim as manim_module
+    builtin_scene_classes = set()
+    for name in dir(manim_module):
+        obj = getattr(manim_module, name)
+        if isinstance(obj, type) and issubclass(obj, Scene):
+            builtin_scene_classes.add(name)
+    
+    # Add manim and common imports to module namespace
+    for name in dir(manim_module):
+        if not name.startswith('_'):
+            setattr(module, name, getattr(manim_module, name))
+    module.np = np
+    module.random = __import__('random')
+    
+    # Load the module
+    try:
+        spec.loader.exec_module(module)
+    except Exception as e:
+        print(f"Manim code execution error: {e}")
+        raise e
+    
+    # Find the Scene subclass that was DEFINED in this file (not imported from manim)
+    scene_class = None
+    for name in dir(module):
+        if name in builtin_scene_classes:
+            continue  # Skip manim's built-in scene classes
+        obj = getattr(module, name)
+        if isinstance(obj, type) and issubclass(obj, Scene) and obj is not Scene:
+            scene_class = obj
+            break
+    
+    if scene_class is None:
+        # Fallback: try specific names
+        for fallback_name in ['GeneratedScene', 'MonteCarloPi', 'MainScene']:
+            scene_class = getattr(module, fallback_name, None)
+            if scene_class is not None:
+                break
+    
+    if scene_class is None:
+        raise RuntimeError(f"No user-defined Scene subclass found in {scene_file}. Built-in classes skipped: {builtin_scene_classes}")
+    
+    # Render the scene
+    scene = scene_class()
     scene.render()
+    
+    # Extract SFX events if available
+    sfx_events = getattr(scene, 'sfx_events', [])
     
     # Save SFX events
     sfx_path = output_dir / "sfx_events.json"
     with open(sfx_path, 'w') as f:
-        json.dump(scene.sfx_events, f, indent=2)
+        json.dump(sfx_events, f, indent=2)
     
     # Find and move output
     possible = list(output_dir.glob("*.mp4")) + list(media_dir.glob("**/*.mp4"))
@@ -212,4 +264,5 @@ def render_from_plan(visual_plan_path: Path, output_path: Path = None) -> tuple:
             import shutil
             shutil.move(str(actual), str(output_path))
     
-    return output_path, scene.sfx_events
+    return output_path, sfx_events
+
