@@ -307,12 +307,46 @@ PACING
 - Final result: self.wait(3)
 
 ═══════════════════════════════════════════════════════════════
-OUTPUT FORMAT
+🚨🚨🚨 CRITICAL: AVOID TRANSFORM ERRORS 🚨🚨🚨
 ═══════════════════════════════════════════════════════════════
 
-Return valid JSON only:
+**ReplacementTransform ONLY works between SIMILAR objects!**
+
+❌ WILL CRASH (shape mismatch):
+- ReplacementTransform(dot, complex_curve)  # Point → many points = ERROR
+- ReplacementTransform(circle, text)  # Different object types = ERROR
+- ReplacementTransform(VGroup of 3, VGroup of 10)  # Different counts = ERROR
+
+✅ SAFE ALTERNATIVES:
+- Use FadeOut(old) then FadeIn(new) for different object types
+- Use Transform only between same-type objects (Text→Text, Circle→Circle)
+- For final reveal: FadeOut(*all_objects), then FadeIn(final_group)
+
+**SAFE FINAL PATTERN**:
+```python
+# Instead of ReplacementTransform(everything, final)
+self.play(*[FadeOut(obj) for obj in [title, shapes, labels]])
+self.wait(0.3)
+final_title = Text("Concept Name", font_size=48).move_to(UP * 0.8)
+final_eq = MathTex(r"equation", font_size=64, color=YELLOW).move_to(DOWN * 0.5)
+self.play(FadeIn(final_title), FadeIn(final_eq))
+```
+
+═══════════════════════════════════════════════════════════════
+OUTPUT FORMAT - JSON ESCAPING IS CRITICAL
+═══════════════════════════════════════════════════════════════
+
+Return valid JSON only. **ALL BACKSLASHES MUST BE DOUBLE-ESCAPED!**
+
+In your manim_code string:
+- Write \\\\n for newlines
+- Write \\\\frac for LaTeX \\frac
+- Write \\\\pi for LaTeX \\pi  
+- Write \\\\ for any single backslash
+
+Example JSON (note the escaping):
 {
-  "manim_code": "construct body with \\n for newlines",
-  "estimated_duration": <seconds>
+  "manim_code": "title = Text(\\"Question?\\")\\nself.play(Write(title))\\neq = MathTex(r\\"\\\\frac{1}{x}\\")\\nself.play(Write(eq))",
+  "estimated_duration": 45
 }
 """
