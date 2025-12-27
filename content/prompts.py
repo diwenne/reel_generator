@@ -172,7 +172,7 @@ THREE ZONES - keep shapes STRICTLY within their zone:
 - NOTHING in center zone can have y > 2.5 (must not touch title!)
 - Arrows, labels, annotations must stay BELOW y = 2.5
 - If you show an arrow pointing to something, the arrow tip + label must be in CENTER zone
-- Title shrinks to corner after intro - center content must not overlap where title lands!
+- Title shrinks and moves to TOP CENTER after intro - stays horizontally centered (x=0)!
 
 **SHAPE SIZING FOR PROPER GAPS**:
 - Maximum shape height: 4.0 units
@@ -216,27 +216,27 @@ label = Text("1/x").move_to(UP * 1)  # ❌ Might overlap with shape!
 🚨🚨🚨 FINAL CONCLUSION: CONCEPT NAME + EQUATION 🚨🚨🚨
 ═══════════════════════════════════════════════════════════════
 
-**THE ANIMATION MUST END WITH TWO ELEMENTS: CONCEPT NAME + EQUATION**
+**THE ANIMATION MUST END BY MORPHING EVERYTHING INTO: CONCEPT NAME + EQUATION**
 
 At the conclusion:
-1. Create the CONCEPT NAME as title: `concept_name = Text("The Basel Problem", font_size=48, color=WHITE).move_to(UP * 0.8)`
-2. Create the FINAL EQUATION below it: `final_eq = Text("1 + 1/4 + 1/9 + ... = π²/6", font_size=64, color=YELLOW).move_to(DOWN * 0.5)`
+1. Create the CONCEPT NAME: `concept_name = Text("The Number e", font_size=48, color=WHITE).move_to(UP * 0.8)`
+2. Create the FINAL EQUATION using MathTex: `final_eq = MathTex(r"e = \\lim_{n \\to \\infty}(1 + \\frac{1}{n})^n", font_size=56, color=YELLOW).move_to(DOWN * 0.3)`
 3. Group them: `final_group = VGroup(concept_name, final_eq)`
-4. Group ALL visible objects: `all_objects = VGroup(title, shapes, labels, equations, ...)`
-5. Morph everything into the final: `self.play(ReplacementTransform(all_objects, final_group))`
+4. Group ALL visible objects: `all_objects = VGroup(title, bar, labels, formula_text)`
+5. **MORPH everything into final**: `self.play(ReplacementTransform(all_objects, final_group), run_time=1.5)`
 6. Hold: `self.wait(3)`
 
-**COMPLETE ENDING PATTERN**:
+**COMPLETE ENDING PATTERN** (use this exact pattern!):
 ```python
 # Create the concept name (ABOVE) and equation (BELOW)
-concept_name = Text("Zeno's Paradox", font_size=48, color=WHITE).move_to(UP * 0.8)
-final_equation = Text("1/2 + 1/4 + ... = 1", font_size=64, color=YELLOW).move_to(DOWN * 0.5)
+concept_name = Text("The Number e", font_size=48, color=WHITE).move_to(UP * 0.8)
+final_equation = MathTex(r"e = \\lim_{n \\to \\infty}(1 + \\frac{1}{n})^n", font_size=56, color=YELLOW).move_to(DOWN * 0.3)
 final_group = VGroup(concept_name, final_equation)
 
-# Gather EVERYTHING currently on screen
-all_visible = VGroup(title, main_square, all_labels, bottom_text)  # Include ALL objects!
+# Gather EVERYTHING currently on screen into one VGroup
+all_visible = VGroup(title, bar, value_label, formula_text)  # Include ALL objects!
 
-# Morph all objects INTO the final group (name + equation)
+# MORPH all objects INTO the final group
 self.play(ReplacementTransform(all_visible, final_group), run_time=1.5)
 
 # Hold on the final result
@@ -245,17 +245,16 @@ self.wait(3)
 
 **REQUIREMENTS FOR FINAL FRAME**:
 ✅ CONCEPT NAME at top (font_size=48, WHITE, at UP * 0.8)
-✅ FINAL EQUATION below it (font_size=64, YELLOW, at DOWN * 0.5)  
+✅ FINAL EQUATION below it (font_size=56, YELLOW, centered)  
 ✅ Both centered horizontally (x = 0)
-✅ ALL other elements (title, shapes, labels) have morphed INTO this
+✅ Use ReplacementTransform to morph all objects into the final group
 ✅ Nothing else on screen - just black background + name + equation
 
 **WRONG ENDINGS**:
 ❌ No concept name shown - MUST include the name of the theorem/concept!
 ❌ Equation off to the side (not centered)
-❌ Title still visible at top separately
-❌ Shapes still visible
-❌ Using FadeOut on objects instead of morphing them into final
+❌ Using FadeOut then FadeIn (boring! we want the morph effect)
+❌ Title still visible at top separately after morph
 
 ═══════════════════════════════════════════════════════════════
 STRUCTURE
@@ -268,8 +267,8 @@ title = Text("Why does 1/2 + 1/4 + ... = 1?", font_size=56)
 # No .to_edge() here - it starts in the middle!
 self.play(Write(title))
 self.wait(1.5)
-# NOW animate it up to the top and make it smaller
-self.play(title.animate.scale(0.7).to_edge(UP, buff=0.3))
+# NOW animate it up to the top CENTER and make it smaller (stays centered!)
+self.play(title.animate.scale(0.6).to_edge(UP, buff=0.3))  # to_edge(UP) keeps x=0
 ```
 **WRONG**: `title = Text(...).to_edge(UP)` ← Don't start at top!
 
@@ -277,7 +276,7 @@ self.play(title.animate.scale(0.7).to_edge(UP, buff=0.3))
 
 3. REVEAL: The "aha" moment
 
-4. CONCLUDE: **MORPH EVERYTHING INTO FINAL EQUATION**
+4. CONCLUDE: **MORPH EVERYTHING INTO FINAL EQUATION** (ReplacementTransform)
 
 ═══════════════════════════════════════════════════════════════
 DRAWING ANGLES (for geometry animations)
@@ -307,30 +306,21 @@ PACING
 - Final result: self.wait(3)
 
 ═══════════════════════════════════════════════════════════════
-🚨🚨🚨 CRITICAL: AVOID TRANSFORM ERRORS 🚨🚨🚨
+🚨🚨🚨 CRITICAL: AVOID TRANSFORM ERRORS (during animation) 🚨🚨🚨
 ═══════════════════════════════════════════════════════════════
 
-**ReplacementTransform ONLY works between SIMILAR objects!**
+**During the animation, be careful with ReplacementTransform:**
 
 ❌ WILL CRASH (shape mismatch):
 - ReplacementTransform(dot, complex_curve)  # Point → many points = ERROR
 - ReplacementTransform(circle, text)  # Different object types = ERROR
-- ReplacementTransform(VGroup of 3, VGroup of 10)  # Different counts = ERROR
 
-✅ SAFE ALTERNATIVES:
-- Use FadeOut(old) then FadeIn(new) for different object types
-- Use Transform only between same-type objects (Text→Text, Circle→Circle)
-- For final reveal: FadeOut(*all_objects), then FadeIn(final_group)
+✅ SAFE TRANSFORMS:
+- Transform/ReplacementTransform between same-type objects (Text→Text, MathTex→MathTex)
+- VGroup to VGroup morphing works well for the FINAL transition
+- Using the pattern: all_visible = VGroup(...), final_group = VGroup(...), ReplacementTransform(all_visible, final_group)
 
-**SAFE FINAL PATTERN**:
-```python
-# Instead of ReplacementTransform(everything, final)
-self.play(*[FadeOut(obj) for obj in [title, shapes, labels]])
-self.wait(0.3)
-final_title = Text("Concept Name", font_size=48).move_to(UP * 0.8)
-final_eq = MathTex(r"equation", font_size=64, color=YELLOW).move_to(DOWN * 0.5)
-self.play(FadeIn(final_title), FadeIn(final_eq))
-```
+**FOR THE FINALE**: Use VGroup-to-VGroup morphing as shown in the FINAL CONCLUSION section above.
 
 ═══════════════════════════════════════════════════════════════
 OUTPUT FORMAT - JSON ESCAPING IS CRITICAL
