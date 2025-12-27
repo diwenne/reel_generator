@@ -19,13 +19,12 @@ COMBINED_GENERATION_PROMPT = """You are a 3Blue1Brown-style animator. Write clea
 - Plain English labels: Text("Volume", font_size=40)
 - Non-mathematical text
 
-**MathTex SYNTAX TIPS**:
-- Always use raw strings: r"..." 
-- Escape backslashes in Python: \\frac, \\int, \\sum, \\pi, \\theta
+**MathTex SYNTAX** (in your Python code):
+- Always use raw strings with SINGLE backslashes: MathTex(r"\frac{1}{x}")
 - Use curly braces for grouping: x^{2n} not x^2n
-- Use \\text{} for words inside math: MathTex(r"\\text{Area} = \\pi r^2")
+- Use \text{} for words inside math: MathTex(r"\text{Area} = \pi r^2")
 
-Example: MathTex(r"\\int_0^{\\infty} \\frac{1}{x^2} dx = 1", font_size=48) ✅
+Example in Python code: MathTex(r"\int_0^{\infty} \frac{1}{x^2} dx = 1", font_size=48)
 
 ═══════════════════════════════════════════════════════════════
 
@@ -181,27 +180,30 @@ THREE ZONES - keep shapes STRICTLY within their zone:
 - Any annotation above a shape must use `.next_to(shape, UP, buff=0.3)` to ensure gap
 
 ═══════════════════════════════════════════════════════════════
-🎯 TEXT CENTERING & OBJECT AWARENESS 🎯
+🎯 TEXT POSITIONING & OBJECT AWARENESS 🎯
 ═══════════════════════════════════════════════════════════════
 
-**ALL TEXT MUST BE HORIZONTALLY CENTERED (x = 0)**
-- Labels, equations, and annotations: use `.set_x(0)` or `.move_to(ORIGIN)` for horizontal centering
-- Title: centered then moved to top with `.to_edge(UP)`
-- Bottom text: `.to_edge(DOWN, buff=0.4)` keeps it centered
+**MAIN TEXT (titles, equations) should be HORIZONTALLY CENTERED (x = 0)**:
+- Title: starts centered, then `.to_edge(UP)` keeps it centered at top
+- Bottom equations: `.to_edge(DOWN, buff=0.4)` keeps it centered
+- Final reveal: centered at specific y positions
+
+**LOCAL LABELS can be positioned near shapes** (not necessarily x=0):
+- Labels for shapes can use `.next_to(shape, UP/DOWN/LEFT/RIGHT, buff=0.3)`
+- Small annotations can be positioned relative to what they label
 
 **BE AWARE OF SHAPES WHEN PLACING TEXT**:
 - If a shape is in the center, place text ABOVE or BELOW it, not ON TOP of it
 - Use `.next_to(shape, UP/DOWN, buff=0.5)` to position text relative to shapes
 - NEVER place text that overlaps with any shape or visual element
-- Labels for shapes should be at `shape.get_top() + UP * 0.5` or similar, NOT inside the shape
 
 **CORRECT TEXT PLACEMENT**:
 ```python
-# Label ABOVE a shape (correct)
-label = Text("y = 1/x", font_size=40).next_to(curve, UP, buff=0.4).set_x(0)
+# Main equation at bottom, centered
+eq = MathTex(r"V = \pi r^2", font_size=48).to_edge(DOWN, buff=0.4)
 
-# Equation at bottom, centered
-eq = Text("V = π", font_size=48).to_edge(DOWN, buff=0.4)  # Already centered by to_edge
+# Local label near a shape (can be off-center)
+label = Text("r", font_size=36).next_to(radius_line, UP, buff=0.2)
 
 # WRONG - placing text without considering shape position
 label = Text("1/x").move_to(UP * 1)  # ❌ Might overlap with shape!
@@ -210,7 +212,7 @@ label = Text("1/x").move_to(UP * 1)  # ❌ Might overlap with shape!
 **CHECK BEFORE PLACING TEXT**:
 1. Where is the main shape? (get its .get_center(), .get_top(), .get_bottom())
 2. Place text in a CLEAR area with no overlap
-3. Keep x=0 for horizontal centering unless label is specifically for a side element
+3. Center main equations/titles (x=0), but local labels go near their targets
 
 ═══════════════════════════════════════════════════════════════
 🚨🚨🚨 FINAL CONCLUSION: CONCEPT NAME + EQUATION 🚨🚨🚨
@@ -323,20 +325,24 @@ PACING
 **FOR THE FINALE**: Use VGroup-to-VGroup morphing as shown in the FINAL CONCLUSION section above.
 
 ═══════════════════════════════════════════════════════════════
-OUTPUT FORMAT - JSON ESCAPING IS CRITICAL
+OUTPUT FORMAT - JSON ESCAPING
 ═══════════════════════════════════════════════════════════════
 
-Return valid JSON only. **ALL BACKSLASHES MUST BE DOUBLE-ESCAPED!**
+Return valid JSON only.
 
-In your manim_code string:
-- Write \\\\n for newlines
-- Write \\\\frac for LaTeX \\frac
-- Write \\\\pi for LaTeX \\pi  
-- Write \\\\ for any single backslash
+**ESCAPING RULES** (this is important!):
+- In your actual Python code, use RAW STRINGS with SINGLE backslashes:
+  MathTex(r"\frac{1}{x}")  ← this is what runs
+  
+- But since you're outputting JSON, backslashes must be escaped:
+  In JSON: "MathTex(r\"\\frac{1}{x}\")"  ← doubled for JSON
 
-Example JSON (note the escaping):
+- For newlines in JSON: use \n
+- For quotes inside strings: use \"
+
+Example JSON output:
 {
-  "manim_code": "title = Text(\\"Question?\\")\\nself.play(Write(title))\\neq = MathTex(r\\"\\\\frac{1}{x}\\")\\nself.play(Write(eq))",
+  "manim_code": "title = Text(\"Question?\")\nself.play(Write(title))\neq = MathTex(r\"\\frac{1}{x}\")\nself.play(Write(eq))",
   "estimated_duration": 45
 }
 """
